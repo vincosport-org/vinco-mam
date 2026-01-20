@@ -101,6 +101,25 @@ On activation, the plugin automatically creates all required tables in the WordP
 - Temporal matching to disambiguate athletes using timestamps
 - WordPress integration for user management and UI hosting
 
+## Version Management
+
+The plugin uses semantic versioning (major.minor.patch). To bump the version:
+
+```bash
+./version-bump.sh [major|minor|patch]
+```
+
+This script will:
+- Update `wordpress-plugin/vinco-mam.php` (both header version and `VINCO_MAM_VERSION` constant)
+- Update `admin-ui/package.json` version
+- Provide instructions for rebuilding and packaging
+
+**Important:** After bumping version, remember to:
+1. Rebuild React app: `cd admin-ui && npm run build`
+2. Update plugin zip: `rm vinco-mam-plugin.zip && zip -r vinco-mam-plugin.zip wordpress-plugin -x "*.git*" "node_modules/*" "*.DS_Store"`
+3. Update `wordpress-plugin/CHANGELOG.md` with changes
+4. Commit changes: `git add -A && git commit -m "Bump version to X.Y.Z"`
+
 ## Development
 
 See individual README files:

@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Settings REST API endpoint** (`/wp-json/vinco-mam/v1/settings`)
 - FileMage setup documentation (`FILEMAGE_SETUP.md`)
 - Troubleshooting guide (`TROUBLESHOOTING.md`)
+- **Version management script** (`.version-bump.sh`) for automated version bumping
 
 ### Fixed
 - **React Router integration** - Fixed empty backend pages issue
