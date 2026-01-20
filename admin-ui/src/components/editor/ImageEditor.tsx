@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { api } from '../../services/api';
 import { useWebSocket } from '../../hooks/useWebSocket';
@@ -32,7 +32,6 @@ export default function ImageEditor() {
   const [loading, setLoading] = useState(true);
   const [edits, setEdits] = useState<EditParameters>({});
   const [saving, setSaving] = useState(false);
-  const [glContext, setGlContext] = useState<WebGLRenderingContext | null>(null);
   const { send } = useWebSocket();
 
   // Load image data
@@ -49,7 +48,7 @@ export default function ImageEditor() {
         img.onload = () => {
           imageRef.current = img;
           setLoading(false);
-          initializeWebGL();
+          applyEdits(img, edits);
         };
         img.src = response.data.signedUrls?.proxy || response.data.signedUrls?.original;
       } catch (error) {
@@ -61,25 +60,6 @@ export default function ImageEditor() {
     loadImage();
   }, [imageId]);
 
-  // Initialize WebGL context
-  const initializeWebGL = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl') as WebGLRenderingContext | null;
-    if (!gl) {
-      console.error('WebGL not supported');
-      return;
-    }
-
-    // Set canvas size
-    if (imageRef.current) {
-      canvas.width = imageRef.current.width;
-      canvas.height = imageRef.current.height;
-    }
-
-    setGlContext(gl as WebGLRenderingContext);
-  }, []);
 
   // Apply edits using WebGL shaders
   useEffect(() => {

@@ -1,5 +1,4 @@
 import { useEffect, useRef, useCallback } from 'react';
-import { useUserStore } from '../stores/userStore';
 
 type EventHandler = (data: any) => void;
 
@@ -7,7 +6,6 @@ export function useWebSocket() {
   const ws = useRef<WebSocket | null>(null);
   const handlers = useRef<Map<string, Set<EventHandler>>>(new Map());
   const reconnectAttempts = useRef(0);
-  const { user } = useUserStore();
   
   const connect = useCallback(() => {
     const settings = window.vincoMAM?.settings;

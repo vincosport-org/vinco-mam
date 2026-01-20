@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 
@@ -44,7 +44,7 @@ declare global {
 }
 
 export default function App() {
-  const { user, capabilities } = useUserStore();
+  const { capabilities } = useUserStore();
   
   // Initialize user store from WordPress data and handle routing
   useEffect(() => {
