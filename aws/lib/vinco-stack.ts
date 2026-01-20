@@ -164,6 +164,12 @@ export class VincoStack extends cdk.Stack {
       visibilityTimeout: cdk.Duration.minutes(10),
     });
 
+    // Lambda Layer for shared code
+    const sharedLayer = new lambda.LayerVersion(this, 'SharedLayer', {
+      code: lambda.Code.fromAsset('lambda/shared'),
+      compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
+    });
+
     // FTP Watcher Lambda - Monitors FileMage FTP uploads
     const ftpWatcher = new lambda.Function(this, 'FtpWatcher', {
       runtime: lambda.Runtime.NODEJS_20_X,
@@ -176,7 +182,7 @@ export class VincoStack extends cdk.Stack {
         IMAGES_BUCKET: imagesBucket.bucketName,
         UPLOADS_BUCKET: uploadsBucket.bucketName,
         IMAGE_PROCESSOR_QUEUE_URL: aiProcessingQueue.queueUrl, // Reuse AI queue for processing
-        FILEMAGE_WATCH_FOLDERS: '', // Set via environment variable or SSM
+        FILEMAGE_WATCH_FOLDERS: '', // Set via environment variable or SSM Parameter Store
       },
     });
 
@@ -184,17 +190,13 @@ export class VincoStack extends cdk.Stack {
     aiProcessingQueue.grantSendMessages(ftpWatcher);
 
     // Trigger FTP watcher on S3 uploads (for FileMage sync)
+    // Note: This watches the photographers/ prefix by default
+    // Additional folders can be configured via FILEMAGE_WATCH_FOLDERS env var
     uploadsBucket.addEventNotification(
       s3.EventType.OBJECT_CREATED,
       new s3n.LambdaDestination(ftpWatcher),
       { prefix: 'photographers/' } // Watch photographers folder by default
     );
-
-    // Lambda Layer for shared code
-    const sharedLayer = new lambda.LayerVersion(this, 'SharedLayer', {
-      code: lambda.Code.fromAsset('lambda/shared'),
-      compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
-    });
 
     // Image Processor Lambda
     const imageProcessor = new lambda.Function(this, 'ImageProcessor', {

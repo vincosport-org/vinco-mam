@@ -28,6 +28,7 @@ class Vinco_MAM_Core {
         require_once VINCO_MAM_PLUGIN_DIR . 'includes/class-vinco-shortcodes.php';
         require_once VINCO_MAM_PLUGIN_DIR . 'admin/class-vinco-admin.php';
         require_once VINCO_MAM_PLUGIN_DIR . 'includes/class-vinco-roles.php';
+        require_once VINCO_MAM_PLUGIN_DIR . 'includes/class-vinco-settings.php';
     }
     
     private function define_admin_hooks() {

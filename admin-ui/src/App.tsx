@@ -8,6 +8,7 @@ import { WebSocketProvider } from './context/WebSocketContext';
 import { KeyboardShortcutsProvider } from './context/KeyboardShortcutsContext';
 
 import Layout from './components/Layout';
+import RouteHandler from './components/RouteHandler';
 import Dashboard from './components/dashboard/Dashboard';
 import Gallery from './components/gallery/Gallery';
 import ImageEditor from './components/editor/ImageEditor';
@@ -52,9 +53,11 @@ export default function App() {
       useUserStore.getState().setCapabilities(window.vincoMAM.user.capabilities || []);
     }
     
-    // Handle WordPress page routing based on currentPage
-    const currentPage = window.vincoMAM?.currentPage;
-    if (currentPage) {
+    // Handle WordPress page routing based on currentPage or URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const pageParam = urlParams.get('page') || window.vincoMAM?.currentPage;
+    
+    if (pageParam) {
       const pageMap: Record<string, string> = {
         'vinco-mam': '/',
         'vinco-mam-gallery': '/gallery',
@@ -66,9 +69,12 @@ export default function App() {
         'vinco-mam-settings': '/settings',
       };
       
-      const targetPath = pageMap[currentPage];
-      if (targetPath && !window.location.hash.includes(targetPath)) {
-        window.location.hash = targetPath;
+      const targetPath = pageMap[pageParam];
+      if (targetPath) {
+        // Use hash-based routing for React Router
+        if (!window.location.hash || window.location.hash === '#/' && targetPath !== '/') {
+          window.history.replaceState(null, '', window.location.pathname + window.location.search + '#' + targetPath);
+        }
       }
     }
   }, []);
