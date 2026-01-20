@@ -15,7 +15,7 @@ export const images = {
   list: (params?: any) => api.get('images', { params }),
   get: (imageId: string) => api.get(`images/${imageId}`),
   update: (imageId: string, data: any) => api.put(`images/${imageId}`, data),
-  saveEdits: (imageId: string, edits: any) => api.put(`images/${imageId}/edits`, { edits }),
+  saveEdits: (imageId: string, edits: any) => api.post(`images/${imageId}/edits`, { edits }),
   getVersions: (imageId: string) => api.get(`images/${imageId}/versions`),
   revert: (imageId: string, versionTimestamp: string) => 
     api.post(`images/${imageId}/revert/${versionTimestamp}`),
@@ -29,7 +29,7 @@ export const albums = {
   create: (data: any) => api.post('albums', data),
   update: (albumId: string, data: any) => api.put(`albums/${albumId}`, data),
   addImages: (albumId: string, imageIds: string[]) => 
-    api.put(`albums/${albumId}/images`, { addImageIds: imageIds }),
+    api.post(`albums/${albumId}/images`, { addImageIds: imageIds }),
   share: (albumId: string, expiryDays?: number) => 
     api.post(`albums/${albumId}/share`, { expiryDays }),
 };
