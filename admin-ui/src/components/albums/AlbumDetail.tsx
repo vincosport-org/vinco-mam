@@ -30,8 +30,8 @@ export default function AlbumDetail() {
     enabled: addImagesModalOpen,
   });
 
-  // Handle both response formats
-  const albumsArray = albumData?.data?.albums || albumData?.albums || [];
+  // Handle response structure: axios wraps in .data, then API returns { albums: [...] }
+  const albumsArray: any[] = (albumData?.data as any)?.albums || (albumData?.data as any) || [];
   const album = albumsArray.find((a: any) => a.albumId === albumId);
   const albumImages = album?.imageIds?.map((id: string) => ({ imageId: id })) || [];
   const allImages = allImagesData?.data?.images || [];

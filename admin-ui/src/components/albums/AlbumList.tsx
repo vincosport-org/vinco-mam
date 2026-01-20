@@ -7,10 +7,12 @@ import toast from 'react-hot-toast';
 
 interface Album {
   albumId: string;
-  name: string;
+  name?: string;
+  title?: string;
   description?: string;
   coverImageUrl?: string;
   imageCount?: number;
+  imageIds?: string[];
   createdAt: string;
   isPublic: boolean;
 }
