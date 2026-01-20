@@ -153,6 +153,16 @@
     padding: 10px;
 }
 
+/* Error messages */
+.vinco-error {
+    padding: 20px;
+    background: #fee;
+    border: 1px solid #fcc;
+    border-radius: 4px;
+    color: #c33;
+    text-align: center;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .vinco-gallery-grid.vinco-col-4,

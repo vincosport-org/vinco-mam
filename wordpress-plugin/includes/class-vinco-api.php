@@ -20,23 +20,58 @@ class Vinco_MAM_API {
     }
     
     public function check_permission($request) {
-        // Basic authentication check
-        if (!is_user_logged_in()) {
-            return new WP_Error('unauthorized', 'You must be logged in', ['status' => 401]);
-        }
-        
-        // Check specific permissions based on endpoint
         $path = $request->get_param('path');
         $method = $request->get_method();
         
-        // Define permission requirements
+        // Public endpoints (no auth required for viewing)
+        $public_get_endpoints = [
+            'images',
+            'albums',
+            'events',
+            'search',
+        ];
+        
+        // Check if this is a public GET request
+        if ($method === 'GET') {
+            foreach ($public_get_endpoints as $endpoint) {
+                if (strpos($path, $endpoint) === 0) {
+                    // Allow public access for viewing galleries/images
+                    return true;
+                }
+            }
+        }
+        
+        // For authenticated endpoints, check login
+        $authenticated_endpoints = [
+            'validation',
+            'users',
+            'photographers',
+        ];
+        
+        $requires_auth = false;
+        foreach ($authenticated_endpoints as $endpoint) {
+            if (strpos($path, $endpoint) === 0) {
+                $requires_auth = true;
+                break;
+            }
+        }
+        
+        // Also require auth for non-GET methods on protected endpoints
+        if ($method !== 'GET' || $requires_auth) {
+            if (!is_user_logged_in()) {
+                return new WP_Error('unauthorized', 'You must be logged in', ['status' => 401]);
+            }
+        }
+        
+        // Check specific permissions based on endpoint and method
         $permissions = [
-            'GET:images' => 'read',
             'PUT:images' => 'vinco_edit_images',
+            'POST:images' => 'vinco_edit_images',
+            'DELETE:images' => 'vinco_edit_images',
             'GET:validation' => 'vinco_validate_recognition',
             'POST:validation' => 'vinco_validate_recognition',
-            'GET:athletes' => 'read',
             'POST:athletes' => 'vinco_manage_athletes',
+            'PUT:athletes' => 'vinco_manage_athletes',
             'GET:users' => 'vinco_manage_users',
             'POST:users' => 'vinco_manage_users',
             'GET:photographers' => 'vinco_manage_users',

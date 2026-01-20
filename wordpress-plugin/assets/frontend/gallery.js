@@ -30,19 +30,31 @@
                 if (albumId) apiUrl += '&albumId=' + albumId;
                 
                 // Fetch and render images
-                $.ajax({
+                var ajaxOptions = {
                     url: apiUrl,
                     method: 'GET',
-                    headers: {
-                        'X-WP-Nonce': vincoMAMFrontend.nonce
-                    },
                     success: function(response) {
                         VincoGallery.renderGallery($gallery, response.images || [], columns, lightbox, showMetadata);
                     },
-                    error: function() {
-                        $gallery.html('<p>Error loading gallery. Please try again later.</p>');
+                    error: function(xhr, status, error) {
+                        var errorMsg = 'Error loading gallery.';
+                        if (xhr.status === 401) {
+                            errorMsg = 'Please log in to view this gallery.';
+                        } else if (xhr.status === 403) {
+                            errorMsg = 'You do not have permission to view this gallery.';
+                        }
+                        $gallery.html('<p class="vinco-error">' + errorMsg + '</p>');
                     }
-                });
+                };
+                
+                // Add nonce if available (for logged-in users)
+                if (vincoMAMFrontend && vincoMAMFrontend.nonce) {
+                    ajaxOptions.headers = {
+                        'X-WP-Nonce': vincoMAMFrontend.nonce
+                    };
+                }
+                
+                $.ajax(ajaxOptions);
             });
         },
         
@@ -54,32 +66,49 @@
                 const lightbox = $album.data('lightbox') === 'true';
                 
                 // Fetch album data
-                $.ajax({
+                var ajaxOptions = {
                     url: vincoMAMFrontend.apiRoot + 'albums/' + albumId,
                     method: 'GET',
-                    headers: {
-                        'X-WP-Nonce': vincoMAMFrontend.nonce
-                    },
                     success: function(album) {
                         // Fetch album images
                         if (album.imageIds && album.imageIds.length > 0) {
                             const imageIds = album.imageIds.slice(0, 50).join(',');
-                            $.ajax({
+                            var imageAjaxOptions = {
                                 url: vincoMAMFrontend.apiRoot + 'images?ids=' + imageIds,
                                 method: 'GET',
-                                headers: {
-                                    'X-WP-Nonce': vincoMAMFrontend.nonce
-                                },
                                 success: function(response) {
                                     VincoGallery.renderGallery($album, response.images || [], columns, lightbox, false);
+                                },
+                                error: function() {
+                                    $album.find('.vinco-gallery-loading').html('<p>Error loading album images.</p>');
                                 }
-                            });
+                            };
+                            
+                            if (vincoMAMFrontend && vincoMAMFrontend.nonce) {
+                                imageAjaxOptions.headers = {
+                                    'X-WP-Nonce': vincoMAMFrontend.nonce
+                                };
+                            }
+                            
+                            $.ajax(imageAjaxOptions);
                         }
                     },
-                    error: function() {
-                        $album.html('<p>Album not found.</p>');
+                    error: function(xhr) {
+                        var errorMsg = 'Album not found.';
+                        if (xhr.status === 401) {
+                            errorMsg = 'Please log in to view this album.';
+                        }
+                        $album.html('<p class="vinco-error">' + errorMsg + '</p>');
                     }
-                });
+                };
+                
+                if (vincoMAMFrontend && vincoMAMFrontend.nonce) {
+                    ajaxOptions.headers = {
+                        'X-WP-Nonce': vincoMAMFrontend.nonce
+                    };
+                }
+                
+                $.ajax(ajaxOptions);
             });
         },
         
@@ -91,12 +120,9 @@
                 const showCaption = $container.data('caption') === 'true';
                 const link = $container.data('link') === 'true';
                 
-                $.ajax({
+                var ajaxOptions = {
                     url: vincoMAMFrontend.apiRoot + 'images/' + imageId,
                     method: 'GET',
-                    headers: {
-                        'X-WP-Nonce': vincoMAMFrontend.nonce
-                    },
                     success: function(image) {
                         const url = size === 'original' ? image.signedUrls.original : 
                                    size === 'large' ? image.signedUrls.proxy : 
@@ -115,10 +141,22 @@
                         }
                         $container.html(html);
                     },
-                    error: function() {
-                        $container.html('<p>Image not found.</p>');
+                    error: function(xhr) {
+                        var errorMsg = 'Image not found.';
+                        if (xhr.status === 401) {
+                            errorMsg = 'Please log in to view this image.';
+                        }
+                        $container.html('<p class="vinco-error">' + errorMsg + '</p>');
                     }
-                });
+                };
+                
+                if (vincoMAMFrontend && vincoMAMFrontend.nonce) {
+                    ajaxOptions.headers = {
+                        'X-WP-Nonce': vincoMAMFrontend.nonce
+                    };
+                }
+                
+                $.ajax(ajaxOptions);
             });
         },
         
@@ -131,19 +169,28 @@
                 const lightbox = $gallery.data('lightbox') === 'true';
                 
                 // Fetch images with athlete recognition
-                $.ajax({
+                var ajaxOptions = {
                     url: vincoMAMFrontend.apiRoot + 'images?athleteId=' + athleteId + '&limit=' + limit,
                     method: 'GET',
-                    headers: {
-                        'X-WP-Nonce': vincoMAMFrontend.nonce
-                    },
                     success: function(response) {
                         VincoGallery.renderGallery($gallery, response.images || [], columns, lightbox, false);
                     },
-                    error: function() {
-                        $gallery.html('<p>No images found for this athlete.</p>');
+                    error: function(xhr) {
+                        var errorMsg = 'No images found for this athlete.';
+                        if (xhr.status === 401) {
+                            errorMsg = 'Please log in to view athlete photos.';
+                        }
+                        $gallery.html('<p class="vinco-error">' + errorMsg + '</p>');
                     }
-                });
+                };
+                
+                if (vincoMAMFrontend && vincoMAMFrontend.nonce) {
+                    ajaxOptions.headers = {
+                        'X-WP-Nonce': vincoMAMFrontend.nonce
+                    };
+                }
+                
+                $.ajax(ajaxOptions);
             });
         },
         

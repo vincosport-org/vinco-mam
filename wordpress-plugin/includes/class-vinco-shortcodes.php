@@ -1,6 +1,7 @@
 <?php
 /**
  * Shortcodes for frontend display
+ * These allow non-admin users to view and interact with galleries on the frontend
  */
 
 class Vinco_MAM_Shortcodes {
@@ -27,16 +28,24 @@ class Vinco_MAM_Shortcodes {
             wp_enqueue_style('vinco-mam-frontend', VINCO_MAM_PLUGIN_URL . 'assets/frontend/style.css', [], VINCO_MAM_VERSION);
             wp_enqueue_script('vinco-mam-frontend', VINCO_MAM_PLUGIN_URL . 'assets/frontend/gallery.js', ['jquery'], VINCO_MAM_VERSION, true);
             
-            wp_localize_script('vinco-mam-frontend', 'vincoMAMFrontend', [
+            // Only include nonce for logged-in users (allows public viewing for GET requests)
+            $localize_data = [
                 'apiRoot' => esc_url_raw(rest_url('vinco-mam/v1/')),
-                'nonce' => wp_create_nonce('wp_rest'),
-            ]);
+            ];
+            
+            // Add nonce only if user is logged in
+            if (is_user_logged_in()) {
+                $localize_data['nonce'] = wp_create_nonce('wp_rest');
+            }
+            
+            wp_localize_script('vinco-mam-frontend', 'vincoMAMFrontend', $localize_data);
         }
     }
     
     /**
      * Render image gallery
      * Usage: [vinco_gallery event_id="123" photographer_id="456" limit="20" columns="4"]
+     * This shortcode works for both logged-in and public users (if gallery is public)
      */
     public function render_gallery($atts) {
         $atts = shortcode_atts([
@@ -47,6 +56,7 @@ class Vinco_MAM_Shortcodes {
             'columns' => 4,
             'lightbox' => 'true',
             'show_metadata' => 'false',
+            'public' => 'false', // If true, allows public viewing
         ], $atts);
         
         $gallery_id = 'vinco-gallery-' . uniqid();
@@ -61,7 +71,8 @@ class Vinco_MAM_Shortcodes {
              data-limit="<?php echo esc_attr($atts['limit']); ?>"
              data-columns="<?php echo esc_attr($atts['columns']); ?>"
              data-lightbox="<?php echo esc_attr($atts['lightbox']); ?>"
-             data-show-metadata="<?php echo esc_attr($atts['show_metadata']); ?>">
+             data-show-metadata="<?php echo esc_attr($atts['show_metadata']); ?>"
+             data-public="<?php echo esc_attr($atts['public']); ?>">
             <div class="vinco-gallery-loading">Loading gallery...</div>
         </div>
         <?php
@@ -77,6 +88,7 @@ class Vinco_MAM_Shortcodes {
             'id' => '',
             'columns' => 4,
             'lightbox' => 'true',
+            'public' => 'false',
         ], $atts);
         
         if (empty($atts['id'])) {
@@ -91,7 +103,8 @@ class Vinco_MAM_Shortcodes {
              class="vinco-album" 
              data-album-id="<?php echo esc_attr($atts['id']); ?>"
              data-columns="<?php echo esc_attr($atts['columns']); ?>"
-             data-lightbox="<?php echo esc_attr($atts['lightbox']); ?>">
+             data-lightbox="<?php echo esc_attr($atts['lightbox']); ?>"
+             data-public="<?php echo esc_attr($atts['public']); ?>">
             <div class="vinco-gallery-loading">Loading album...</div>
         </div>
         <?php
@@ -108,6 +121,7 @@ class Vinco_MAM_Shortcodes {
             'size' => 'large', // thumbnail, medium, large, original
             'caption' => 'false',
             'link' => 'false',
+            'public' => 'false',
         ], $atts);
         
         if (empty($atts['id'])) {
@@ -123,7 +137,8 @@ class Vinco_MAM_Shortcodes {
              data-image-id="<?php echo esc_attr($atts['id']); ?>"
              data-size="<?php echo esc_attr($atts['size']); ?>"
              data-caption="<?php echo esc_attr($atts['caption']); ?>"
-             data-link="<?php echo esc_attr($atts['link']); ?>">
+             data-link="<?php echo esc_attr($atts['link']); ?>"
+             data-public="<?php echo esc_attr($atts['public']); ?>">
             <div class="vinco-image-loading">Loading image...</div>
         </div>
         <?php
@@ -140,6 +155,7 @@ class Vinco_MAM_Shortcodes {
             'limit' => 10,
             'columns' => 3,
             'lightbox' => 'true',
+            'public' => 'false',
         ], $atts);
         
         if (empty($atts['athlete_id'])) {
@@ -155,7 +171,8 @@ class Vinco_MAM_Shortcodes {
              data-athlete-id="<?php echo esc_attr($atts['athlete_id']); ?>"
              data-limit="<?php echo esc_attr($atts['limit']); ?>"
              data-columns="<?php echo esc_attr($atts['columns']); ?>"
-             data-lightbox="<?php echo esc_attr($atts['lightbox']); ?>">
+             data-lightbox="<?php echo esc_attr($atts['lightbox']); ?>"
+             data-public="<?php echo esc_attr($atts['public']); ?>">
             <div class="vinco-gallery-loading">Loading athlete gallery...</div>
         </div>
         <?php

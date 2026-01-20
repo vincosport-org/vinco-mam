@@ -4,24 +4,33 @@
 class Vinco_MAM_Admin {
     
     public function add_admin_menu() {
-        // Main menu
+        // Only show admin menu to users with appropriate permissions
+        if (!current_user_can('edit_posts') && !current_user_can('manage_options')) {
+            return;
+        }
+        
+        // Main menu - only for editors/admins
         add_menu_page(
             'Vinco MAM',
             'Vinco MAM',
-            'read',
+            'edit_posts', // Requires at least editor permissions
             'vinco-mam',
             [$this, 'render_main_page'],
             'dashicons-format-gallery',
             30
         );
         
-        // Submenus
-        add_submenu_page('vinco-mam', 'Gallery', 'Gallery', 'read', 'vinco-mam', [$this, 'render_main_page']);
-        add_submenu_page('vinco-mam', 'Validation', 'Validation', 'edit_posts', 'vinco-mam-validation', [$this, 'render_main_page']);
+        // Submenus - different permissions for different sections
+        add_submenu_page('vinco-mam', 'Gallery', 'Gallery', 'edit_posts', 'vinco-mam', [$this, 'render_main_page']);
+        add_submenu_page('vinco-mam', 'Validation', 'Validation', 'vinco_validate_recognition', 'vinco-mam-validation', [$this, 'render_main_page']);
         add_submenu_page('vinco-mam', 'Athletes', 'Athletes', 'edit_posts', 'vinco-mam-athletes', [$this, 'render_main_page']);
-        add_submenu_page('vinco-mam', 'Albums', 'Albums', 'read', 'vinco-mam-albums', [$this, 'render_main_page']);
-        add_submenu_page('vinco-mam', 'Videos', 'Videos', 'read', 'vinco-mam-videos', [$this, 'render_main_page']);
-        add_submenu_page('vinco-mam', 'Settings', 'Settings', 'manage_options', 'vinco-mam-settings', [$this, 'render_main_page']);
+        add_submenu_page('vinco-mam', 'Albums', 'Albums', 'edit_posts', 'vinco-mam-albums', [$this, 'render_main_page']);
+        add_submenu_page('vinco-mam', 'Videos', 'Videos', 'edit_posts', 'vinco-mam-videos', [$this, 'render_main_page']);
+        
+        // Settings - admin only
+        if (current_user_can('manage_options')) {
+            add_submenu_page('vinco-mam', 'Settings', 'Settings', 'manage_options', 'vinco-mam-settings', [$this, 'render_main_page']);
+        }
     }
     
     public function enqueue_scripts($hook) {
