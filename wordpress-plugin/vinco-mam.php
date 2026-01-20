@@ -9,7 +9,7 @@
 
 defined('ABSPATH') || exit;
 
-define('VINCO_MAM_VERSION', '1.1.0');
+define('VINCO_MAM_VERSION', '1.1.1');
 define('VINCO_MAM_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('VINCO_MAM_PLUGIN_URL', plugin_dir_url(__FILE__));
 
