@@ -3,5 +3,12 @@
   "version": "1.0.0",
   "description": "Shared utilities for Vinco MAM Lambda functions",
   "main": "index.js",
-  "dependencies": {}
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.971.0",
+    "@aws-sdk/client-rekognition": "^3.971.0",
+    "@aws-sdk/client-s3": "^3.971.0",
+    "@aws-sdk/lib-dynamodb": "^3.971.0",
+    "@aws-sdk/s3-request-presigner": "^3.971.0",
+    "uuid": "^13.0.0"
+  }
 }
