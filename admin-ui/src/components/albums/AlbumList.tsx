@@ -32,8 +32,8 @@ export default function AlbumList() {
     queryFn: () => albums.list(),
   });
 
-  // Handle both response formats: { albums: [...] } or { data: { albums: [...] } }
-  const albumsList: Album[] = data?.data?.albums || data?.albums || [];
+  // Handle response structure: axios wraps in .data, then API returns { albums: [...] }
+  const albumsList: Album[] = (data?.data as any)?.albums || (data?.data as any) || [];
   const filteredAlbums = albumsList.filter(album =>
     (album.name || album.title || '').toLowerCase().includes(search.toLowerCase()) ||
     (album.description || '').toLowerCase().includes(search.toLowerCase())
