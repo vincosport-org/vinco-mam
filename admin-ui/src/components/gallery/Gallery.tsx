@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { images } from '../../services/api';
-import { LoadingSpinner, Button, Input } from '../common';
+import { LoadingSpinner, Button, Input, Skeleton } from '../common';
 import { GalleryItem } from './GalleryItem';
 import { ImagePreview } from './ImagePreview';
 
@@ -101,8 +101,10 @@ export default function Gallery() {
 
       {/* Results */}
       {isLoading && (
-        <div className="flex justify-center items-center py-12">
-          <LoadingSpinner size="lg" />
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <Skeleton key={i} variant="rectangular" height={200} className="w-full aspect-square rounded-lg" />
+          ))}
         </div>
       )}
 

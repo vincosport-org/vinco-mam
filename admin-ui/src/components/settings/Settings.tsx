@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Button, Input } from '../common';
+import { Button, Input, FormField, Skeleton } from '../common';
+import toast from 'react-hot-toast';
 
 interface Settings {
   aws_region: string;
@@ -78,10 +79,10 @@ export default function Settings() {
         window.vincoMAM.settings = result.settings || settings;
       }
       
-      alert('Settings saved successfully!');
+      toast.success('Settings saved successfully!');
     } catch (error) {
       console.error('Error saving settings:', error);
-      alert('Error saving settings. Please try again.');
+      toast.error('Error saving settings. Please try again.');
     } finally {
       setSaving(false);
     }

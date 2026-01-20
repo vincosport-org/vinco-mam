@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { images, albums, validation, athletes } from '../../services/api';
-import { LoadingSpinner, Button } from '../common';
+import { LoadingSpinner, Button, Skeleton } from '../common';
 import { StatsWidget } from './StatsWidget';
 
 export default function Dashboard() {
@@ -43,9 +43,15 @@ export default function Dashboard() {
       <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
 
       {isLoading ? (
-        <div className="flex justify-center items-center py-12">
-          <LoadingSpinner size="lg" />
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} variant="rectangular" height={140} className="rounded-lg" />
+            ))}
+          </div>
+          <Skeleton variant="rectangular" height={400} className="rounded-lg mb-6" />
+          <Skeleton variant="rectangular" height={150} className="rounded-lg" />
+        </>
       ) : (
         <>
           {/* Statistics Cards */}

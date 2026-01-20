@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { validation, athletes } from '../../services/api';
-import { LoadingSpinner, Button, Modal, Input } from '../common';
+import { LoadingSpinner, Button, Modal, Input, Skeleton } from '../common';
 import { ValidationItem as ValidationItemComponent } from './ValidationItem';
 import { AthleteComparison as AthleteComparisonComponent } from './AthleteComparison';
 import toast from 'react-hot-toast';
@@ -119,8 +119,15 @@ export default function ValidationQueue() {
       <h1 className="text-2xl font-bold mb-6">Validation Queue</h1>
 
       {isLoading && (
-        <div className="flex justify-center items-center py-12">
-          <LoadingSpinner size="lg" />
+        <div className="flex gap-6">
+          <div className="w-80 space-y-0">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} variant="rectangular" height={120} className="mb-2 rounded-lg" />
+            ))}
+          </div>
+          <div className="flex-1">
+            <Skeleton variant="rectangular" height={500} className="rounded-lg" />
+          </div>
         </div>
       )}
 

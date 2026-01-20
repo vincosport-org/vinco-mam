@@ -3,3 +3,8 @@ export { Input } from './Input';
 export { Modal } from './Modal';
 export { ImageThumbnail } from './ImageThumbnail';
 export { LoadingSpinner } from './LoadingSpinner';
+export { ErrorBoundary } from './ErrorBoundary';
+export { SearchBar } from './SearchBar';
+export { Dropdown } from './Dropdown';
+export { Skeleton } from './Skeleton';
+export { FormField } from './FormField';

@@ -1,22 +1,41 @@
 /**
  * Frontend gallery styles for shortcodes
+ * Modern, polished UI for public-facing galleries
  */
 .vinco-gallery,
 .vinco-album,
 .vinco-athlete-gallery {
-    margin: 20px 0;
+    margin: 30px 0;
 }
 
 .vinco-gallery-loading,
 .vinco-image-loading {
     text-align: center;
-    padding: 40px;
+    padding: 60px 20px;
     color: #666;
+    font-size: 16px;
+}
+
+/* Loading skeleton animation */
+.vinco-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s ease-in-out infinite;
+    border-radius: 8px;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
 }
 
 .vinco-gallery-grid {
     display: grid;
-    gap: 15px;
+    gap: 20px;
     margin: 0;
 }
 
@@ -48,24 +67,35 @@
     position: relative;
     overflow: hidden;
     aspect-ratio: 1;
-    border-radius: 4px;
-    background: #f0f0f0;
+    border-radius: 8px;
+    background: #f5f5f5;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.vinco-gallery-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 .vinco-gallery-item img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.3s ease;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: block;
 }
 
 .vinco-gallery-item:hover img {
-    transform: scale(1.05);
+    transform: scale(1.08);
 }
 
 .vinco-gallery-item .vinco-lightbox {
     display: block;
     cursor: pointer;
+    text-decoration: none;
+    color: inherit;
 }
 
 .vinco-image-title {
@@ -73,111 +103,297 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 70%, transparent 100%);
     color: white;
-    padding: 10px;
+    padding: 16px 12px 12px;
     font-size: 14px;
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    transform: translateY(10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.vinco-gallery-item:hover .vinco-image-title {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 /* Single Image */
 .vinco-single-image {
-    margin: 20px 0;
+    margin: 30px 0;
     text-align: center;
 }
 
 .vinco-single-image img.vinco-image {
     max-width: 100%;
     height: auto;
-    border-radius: 4px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .vinco-image-caption {
-    margin-top: 10px;
+    margin-top: 12px;
     font-style: italic;
     color: #666;
+    font-size: 14px;
 }
 
-/* Lightbox */
+/* Enhanced Lightbox */
 .vinco-lightbox-overlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.9);
-    z-index: 9999;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 99999;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 40px 20px;
+    animation: fadeIn 0.3s ease;
+    backdrop-filter: blur(4px);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 .vinco-lightbox-content {
     position: relative;
-    max-width: 90%;
-    max-height: 90%;
+    max-width: 95%;
+    max-height: 95vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: scaleIn 0.3s ease;
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 .vinco-lightbox-content img {
     max-width: 100%;
-    max-height: 90vh;
+    max-height: 85vh;
     object-fit: contain;
+    border-radius: 4px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
-.vinco-lightbox-close {
+.vinco-lightbox-controls {
     position: absolute;
-    top: -40px;
-    right: 0;
-    background: none;
-    border: none;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 1;
+}
+
+.vinco-lightbox-close,
+.vinco-lightbox-prev,
+.vinco-lightbox-next {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
-    font-size: 40px;
+    font-size: 24px;
     cursor: pointer;
     line-height: 1;
-    padding: 0;
-    width: 40px;
-    height: 40px;
+    padding: 12px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(10px);
 }
 
-.vinco-lightbox-close:hover {
-    opacity: 0.7;
+.vinco-lightbox-close:hover,
+.vinco-lightbox-prev:hover,
+.vinco-lightbox-next:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.vinco-lightbox-prev,
+.vinco-lightbox-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 32px;
+}
+
+.vinco-lightbox-prev {
+    left: 20px;
+}
+
+.vinco-lightbox-next {
+    right: 20px;
 }
 
 .vinco-lightbox-title {
-    position: absolute;
-    bottom: -40px;
-    left: 0;
-    right: 0;
+    margin-top: 20px;
     color: white;
     text-align: center;
-    padding: 10px;
+    font-size: 18px;
+    font-weight: 500;
+    max-width: 800px;
+    padding: 0 20px;
+}
+
+.vinco-lightbox-counter {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: white;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    backdrop-filter: blur(10px);
 }
 
 /* Error messages */
 .vinco-error {
-    padding: 20px;
-    background: #fee;
-    border: 1px solid #fcc;
-    border-radius: 4px;
-    color: #c33;
+    padding: 24px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-left: 4px solid #ef4444;
+    border-radius: 8px;
+    color: #991b1b;
     text-align: center;
+    font-size: 15px;
+    margin: 20px 0;
+}
+
+.vinco-error-icon {
+    display: inline-block;
+    margin-bottom: 8px;
+    font-size: 24px;
+}
+
+/* Empty state */
+.vinco-empty-state {
+    padding: 60px 20px;
+    text-align: center;
+    color: #666;
+}
+
+.vinco-empty-state-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.vinco-empty-state-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.vinco-empty-state-text {
+    font-size: 14px;
+    color: #666;
 }
 
 /* Responsive */
+@media (max-width: 1024px) {
+    .vinco-gallery-grid.vinco-col-5,
+    .vinco-gallery-grid.vinco-col-6 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
 @media (max-width: 768px) {
     .vinco-gallery-grid.vinco-col-4,
     .vinco-gallery-grid.vinco-col-5,
     .vinco-gallery-grid.vinco-col-6 {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
     }
     
     .vinco-gallery-grid.vinco-col-3 {
         grid-template-columns: repeat(2, 1fr);
     }
+
+    .vinco-lightbox-controls {
+        top: 10px;
+        right: 10px;
+    }
+
+    .vinco-lightbox-prev,
+    .vinco-lightbox-next {
+        width: 36px;
+        height: 36px;
+        font-size: 24px;
+    }
+
+    .vinco-lightbox-prev {
+        left: 10px;
+    }
+
+    .vinco-lightbox-next {
+        right: 10px;
+    }
+
+    .vinco-lightbox-counter {
+        top: 10px;
+        left: 10px;
+        font-size: 12px;
+        padding: 6px 12px;
+    }
 }
 
 @media (max-width: 480px) {
     .vinco-gallery-grid {
-        grid-template-columns: repeat(1, 1fr) !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px;
+    }
+
+    .vinco-gallery-item {
+        border-radius: 6px;
+    }
+
+    .vinco-lightbox-overlay {
+        padding: 20px 10px;
+    }
+
+    .vinco-lightbox-content img {
+        max-height: 75vh;
+    }
+
+    .vinco-lightbox-title {
+        font-size: 14px;
+        margin-top: 12px;
+    }
+}
+
+/* Accessibility */
+.vinco-lightbox-close:focus,
+.vinco-lightbox-prev:focus,
+.vinco-lightbox-next:focus {
+    outline: 2px solid white;
+    outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+    .vinco-lightbox-overlay {
+        display: none;
     }
 }
