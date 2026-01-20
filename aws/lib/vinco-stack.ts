@@ -5,7 +5,7 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as apigatewayv2 from 'aws-cdk-lib/aws-apigatewayv2';
-// No VPC/EC2 needed - all services are serverless
+import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 import * as s3n from 'aws-cdk-lib/aws-s3-notifications';
 import * as lambdaEventSources from 'aws-cdk-lib/aws-lambda-event-sources';
@@ -16,7 +16,22 @@ export class VincoStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // No VPC needed - DynamoDB is serverless
+    // VPC for Lambda functions (with VPC endpoints for S3 and DynamoDB for security)
+    const vpc = new ec2.Vpc(this, 'VincoVpc', {
+      maxAzs: 2,
+      natGateways: 1,
+      enableDnsHostnames: true,
+      enableDnsSupport: true,
+    });
+
+    // VPC Endpoints for S3 and DynamoDB (keeps traffic within AWS network)
+    vpc.addGatewayEndpoint('S3Endpoint', {
+      service: ec2.GatewayVpcEndpointAwsService.S3,
+    });
+
+    vpc.addGatewayEndpoint('DynamoDBEndpoint', {
+      service: ec2.GatewayVpcEndpointAwsService.DYNAMODB,
+    });
 
     // S3 Buckets
     const uploadsBucket = new s3.Bucket(this, 'UploadsBucket', {
@@ -44,6 +59,21 @@ export class VincoStack extends cdk.Stack {
       bucketName: 'vinco-exports',
       lifecycleRules: [{
         expiration: cdk.Duration.days(7),
+      }],
+    });
+
+    // Platform storage bucket (for additional platform data, backups, etc.)
+    const platformStorageBucket = new s3.Bucket(this, 'PlatformStorageBucket', {
+      bucketName: 'vinco-platform-storage',
+      versioned: true,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      lifecycleRules: [{
+        id: 'TransitionToGlacier',
+        transitions: [{
+          storageClass: s3.StorageClass.GLACIER,
+          transitionAfter: cdk.Duration.days(90),
+        }],
       }],
     });
 
@@ -190,7 +220,7 @@ export class VincoStack extends cdk.Stack {
       batchSize: 1,
     }));
 
-    // AI Recognition Lambda
+    // AI Recognition Lambda (in VPC for network isolation)
     const aiRecognition = new lambda.Function(this, 'AIRecognition', {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: 'index.handler',
@@ -198,16 +228,20 @@ export class VincoStack extends cdk.Stack {
       layers: [sharedLayer],
       timeout: cdk.Duration.minutes(2),
       memorySize: 1024,
+      vpc,
+      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
       environment: {
         IMAGES_BUCKET: imagesBucket.bucketName,
         IMAGES_TABLE: imagesTable.tableName,
         VALIDATION_TABLE: validationQueueTable.tableName,
         CONNECTIONS_TABLE: connectionsTable.tableName,
         REKOGNITION_COLLECTION_ID: 'vinco-athletes',
+        PLATFORM_STORAGE_BUCKET: platformStorageBucket.bucketName,
       },
     });
 
     imagesBucket.grantRead(aiRecognition);
+    platformStorageBucket.grantReadWrite(aiRecognition);
     imagesTable.grantReadWriteData(aiRecognition);
     validationQueueTable.grantReadWriteData(aiRecognition);
     connectionsTable.grantReadData(aiRecognition);
@@ -266,10 +300,22 @@ export class VincoStack extends cdk.Stack {
     // Outputs
     new cdk.CfnOutput(this, 'ApiEndpoint', {
       value: api.url,
+      description: 'REST API endpoint for WordPress integration',
     });
 
     new cdk.CfnOutput(this, 'WebSocketEndpoint', {
       value: `wss://${webSocketApi.ref}.execute-api.${this.region}.amazonaws.com/prod`,
+      description: 'WebSocket API endpoint for real-time updates',
+    });
+
+    new cdk.CfnOutput(this, 'PlatformStorageBucket', {
+      value: platformStorageBucket.bucketName,
+      description: 'S3 bucket for platform storage and backups',
+    });
+
+    new cdk.CfnOutput(this, 'VpcId', {
+      value: vpc.vpcId,
+      description: 'VPC ID for network isolation',
     });
   }
 }
