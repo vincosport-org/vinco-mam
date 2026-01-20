@@ -22,7 +22,7 @@ After deployment, note the API endpoint and WebSocket endpoint from the outputs.
 ## Step 2: Create Rekognition Collection
 
 ```bash
-aws rekognition create-collection --collection-id vinco-athletes --region eu-west-2
+aws rekognition create-collection --collection-id vinco-athletes --region eu-west-1
 ```
 
 ## Step 3: Build React Admin UI
