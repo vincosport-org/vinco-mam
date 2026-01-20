@@ -11,4 +11,7 @@ if (rootElement) {
       <App />
     </React.StrictMode>,
   );
+} else {
+  // Debug: log if root element not found
+  console.error('Vinco MAM: Root element #vinco-mam-root not found in DOM');
 }

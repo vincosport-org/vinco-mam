@@ -4,6 +4,7 @@ import { validation, athletes } from '../../services/api';
 import { LoadingSpinner, Button, Modal, Input, Skeleton } from '../common';
 import { ValidationItem as ValidationItemComponent } from './ValidationItem';
 import { AthleteComparison as AthleteComparisonComponent } from './AthleteComparison';
+import { useUserStore } from '../../stores/userStore';
 import toast from 'react-hot-toast';
 
 interface ValidationItem {
@@ -113,6 +114,22 @@ export default function ValidationQueue() {
       newAthleteId: reassignAthleteId,
     });
   };
+
+  // Check permissions - show message if user doesn't have access
+  const { capabilities } = useUserStore();
+  
+  if (!capabilities.includes('validateRecognition') && !capabilities.includes('manageSettings')) {
+    return (
+      <div className="p-6">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6">
+          <h2 className="text-xl font-semibold text-yellow-800 dark:text-yellow-200 mb-2">Access Restricted</h2>
+          <p className="text-yellow-700 dark:text-yellow-300">
+            You don't have permission to access the validation queue. Please contact an administrator.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">

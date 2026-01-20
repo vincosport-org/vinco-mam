@@ -21,8 +21,9 @@ class Vinco_MAM_Admin {
         );
         
         // Submenus - different permissions for different sections
+        // Note: We use edit_posts for all pages and let React handle route-level permissions
         add_submenu_page('vinco-mam', 'Gallery', 'Gallery', 'edit_posts', 'vinco-mam', [$this, 'render_main_page']);
-        add_submenu_page('vinco-mam', 'Validation', 'Validation', 'vinco_validate_recognition', 'vinco-mam-validation', [$this, 'render_main_page']);
+        add_submenu_page('vinco-mam', 'Validation', 'Validation', 'edit_posts', 'vinco-mam-validation', [$this, 'render_main_page']);
         add_submenu_page('vinco-mam', 'Athletes', 'Athletes', 'edit_posts', 'vinco-mam-athletes', [$this, 'render_main_page']);
         add_submenu_page('vinco-mam', 'Albums', 'Albums', 'edit_posts', 'vinco-mam-albums', [$this, 'render_main_page']);
         add_submenu_page('vinco-mam', 'Videos', 'Videos', 'edit_posts', 'vinco-mam-videos', [$this, 'render_main_page']);
@@ -71,7 +72,11 @@ class Vinco_MAM_Admin {
     }
     
     public function render_main_page() {
-        echo '<div id="vinco-mam-root"></div>';
+        ?>
+        <div class="wrap">
+            <div id="vinco-mam-root"></div>
+        </div>
+        <?php
     }
     
     private function get_vinco_role() {

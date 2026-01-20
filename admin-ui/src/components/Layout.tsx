@@ -18,12 +18,14 @@ export default function Layout({ children }: LayoutProps) {
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, page: string, path: string) => {
     e.preventDefault();
+    // Update hash for React Router
+    window.location.hash = path;
+    // Also navigate with React Router
     navigate(path);
-    // Update WordPress URL without reload
-    const newUrl = window.location.pathname + '?page=' + page;
-    window.history.pushState({ page }, '', newUrl);
-    // Trigger RouteHandler to sync
-    window.dispatchEvent(new PopStateEvent('popstate'));
+    // Update WordPress URL query parameter without reload
+    const url = new URL(window.location.href);
+    url.searchParams.set('page', page);
+    window.history.pushState({ page }, '', url.toString());
   };
 
   const getCurrentPage = () => {

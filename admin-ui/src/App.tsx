@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 
@@ -71,11 +71,9 @@ export default function App() {
       };
       
       const targetPath = pageMap[pageParam];
-      if (targetPath) {
+      if (targetPath && window.location.hash !== '#' + targetPath) {
         // Use hash-based routing for React Router
-        if (!window.location.hash || window.location.hash === '#/' && targetPath !== '/') {
-          window.history.replaceState(null, '', window.location.pathname + window.location.search + '#' + targetPath);
-        }
+        window.location.hash = targetPath;
       }
     }
   }, []);
@@ -85,7 +83,7 @@ export default function App() {
       <QueryClientProvider client={queryClient}>
         <WebSocketProvider>
           <KeyboardShortcutsProvider>
-            <BrowserRouter>
+            <HashRouter>
               <Layout>
                 <RouteHandler />
                 <Routes>
@@ -96,10 +94,8 @@ export default function App() {
                 <Route path="/gallery" element={<Gallery />} />
                 <Route path="/gallery/:imageId" element={<ImageEditor />} />
                 
-                {/* Validation */}
-                {capabilities.includes('validateRecognition') && (
-                  <Route path="/validation" element={<ValidationQueue />} />
-                )}
+                {/* Validation - show to all, let component handle permission checks */}
+                <Route path="/validation" element={<ValidationQueue />} />
                 
                 {/* Athletes */}
                 <Route path="/athletes" element={<AthleteList />} />
@@ -112,16 +108,12 @@ export default function App() {
                 {/* Videos */}
                 <Route path="/videos" element={<VideoList />} />
                 
-                {/* Admin */}
-                {capabilities.includes('manageUsers') && (
-                  <Route path="/users" element={<UserManagement />} />
-                )}
-                {capabilities.includes('manageSettings') && (
-                  <Route path="/settings" element={<Settings />} />
-                )}
+                {/* Admin - show to all, let components handle permission checks */}
+                <Route path="/users" element={<UserManagement />} />
+                <Route path="/settings" element={<Settings />} />
               </Routes>
             </Layout>
-          </BrowserRouter>
+          </HashRouter>
           <Toaster position="bottom-right" />
         </KeyboardShortcutsProvider>
       </WebSocketProvider>
