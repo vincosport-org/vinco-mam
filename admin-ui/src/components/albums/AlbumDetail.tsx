@@ -30,28 +30,36 @@ export default function AlbumDetail() {
     enabled: addImagesModalOpen,
   });
 
-  const album = albumData?.data?.albums?.find((a: any) => a.albumId === albumId);
-  const albumImages = album?.images || [];
+  // Handle both response formats
+  const albumsArray = albumData?.data?.albums || albumData?.albums || [];
+  const album = albumsArray.find((a: any) => a.albumId === albumId);
+  const albumImages = album?.imageIds?.map((id: string) => ({ imageId: id })) || [];
   const allImages = allImagesData?.data?.images || [];
 
   // Initialize form data
   if (album && !editing && formData.name === '') {
     setFormData({
-      name: album.name || '',
+      name: album.title || album.name || '',
       description: album.description || '',
       isPublic: album.isPublic || false,
     });
   }
 
   const updateMutation = useMutation({
-    mutationFn: (data: any) => albums.update(albumId!, data),
+    mutationFn: (data: any) => albums.update(albumId!, {
+      title: data.name, // Lambda expects 'title'
+      description: data.description,
+      isPublic: data.isPublic,
+    }),
     onSuccess: () => {
       toast.success('Album updated');
       setEditing(false);
       queryClient.invalidateQueries({ queryKey: ['album', albumId] });
+      queryClient.invalidateQueries({ queryKey: ['albums'] });
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to update album');
+      console.error('Album update error:', error);
+      toast.error(error.response?.data?.message || error.message || 'Failed to update album');
     },
   });
 

@@ -22,8 +22,13 @@ export const handler = async (
       return auth.createErrorResponse(401, 'Unauthorized', 'UNAUTHORIZED');
     }
 
-    if (!auth.hasPermission(user, 'CONTENT_TEAM')) {
-      return auth.createErrorResponse(403, 'Insufficient permissions', 'FORBIDDEN');
+    // Allow ADMIN, EDITOR, or CONTENT_TEAM to create albums
+    const allowedRoles = ['ADMIN', 'EDITOR', 'CONTENT_TEAM'];
+    if (!user.role || !allowedRoles.includes(user.role)) {
+      // Fallback: check if user has permission
+      if (!auth.hasPermission(user, 'CONTENT_TEAM')) {
+        return auth.createErrorResponse(403, 'Insufficient permissions', 'FORBIDDEN');
+      }
     }
 
     const body = JSON.parse(event.body || '{}') as CreateAlbumRequest;

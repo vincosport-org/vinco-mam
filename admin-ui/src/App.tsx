@@ -89,8 +89,6 @@ export default function App() {
               <Routes>
                 {/* Dashboard */}
                 <Route path="/" element={<Dashboard />} />
-                <Route path="/page=vinco-mam" element={<Dashboard />} />
-                <Route path="/page=vinco-mam-gallery" element={<Dashboard />} />
                 
                 {/* Gallery */}
                 <Route path="/gallery" element={<Gallery />} />
@@ -98,40 +96,26 @@ export default function App() {
                 
                 {/* Validation */}
                 {capabilities.includes('validateRecognition') && (
-                  <>
-                    <Route path="/validation" element={<ValidationQueue />} />
-                    <Route path="/page=vinco-mam-validation" element={<ValidationQueue />} />
-                  </>
+                  <Route path="/validation" element={<ValidationQueue />} />
                 )}
                 
                 {/* Athletes */}
                 <Route path="/athletes" element={<AthleteList />} />
-                <Route path="/page=vinco-mam-athletes" element={<AthleteList />} />
                 <Route path="/athletes/:athleteId" element={<AthleteDetail />} />
-                <Route path="/page=vinco-mam-athletes/:athleteId" element={<AthleteDetail />} />
                 
                 {/* Albums */}
                 <Route path="/albums" element={<AlbumList />} />
-                <Route path="/page=vinco-mam-albums" element={<AlbumList />} />
                 <Route path="/albums/:albumId" element={<AlbumDetail />} />
-                <Route path="/page=vinco-mam-albums/:albumId" element={<AlbumDetail />} />
                 
                 {/* Videos */}
                 <Route path="/videos" element={<VideoList />} />
-                <Route path="/page=vinco-mam-videos" element={<VideoList />} />
                 
                 {/* Admin */}
                 {capabilities.includes('manageUsers') && (
-                  <>
-                    <Route path="/users" element={<UserManagement />} />
-                    <Route path="/page=vinco-mam-users" element={<UserManagement />} />
-                  </>
+                  <Route path="/users" element={<UserManagement />} />
                 )}
                 {capabilities.includes('manageSettings') && (
-                  <>
-                    <Route path="/settings" element={<Settings />} />
-                    <Route path="/page=vinco-mam-settings" element={<Settings />} />
-                  </>
+                  <Route path="/settings" element={<Settings />} />
                 )}
               </Routes>
             </Layout>

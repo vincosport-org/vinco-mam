@@ -30,10 +30,11 @@ export default function AlbumList() {
     queryFn: () => albums.list(),
   });
 
-  const albumsList: Album[] = data?.data?.albums || [];
+  // Handle both response formats: { albums: [...] } or { data: { albums: [...] } }
+  const albumsList: Album[] = data?.data?.albums || data?.albums || [];
   const filteredAlbums = albumsList.filter(album =>
-    album.name.toLowerCase().includes(search.toLowerCase()) ||
-    album.description?.toLowerCase().includes(search.toLowerCase())
+    (album.name || album.title || '').toLowerCase().includes(search.toLowerCase()) ||
+    (album.description || '').toLowerCase().includes(search.toLowerCase())
   );
 
   const handleCreate = async () => {
@@ -43,13 +44,19 @@ export default function AlbumList() {
     }
 
     try {
-      await albums.create(newAlbum);
+      // Lambda expects 'title' not 'name'
+      await albums.create({
+        title: newAlbum.name,
+        description: newAlbum.description,
+        isPublic: newAlbum.isPublic,
+      });
       toast.success('Album created');
       setCreateModalOpen(false);
       setNewAlbum({ name: '', description: '', isPublic: false });
       refetch();
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to create album');
+      console.error('Album creation error:', error);
+      toast.error(error.response?.data?.message || error.message || 'Failed to create album');
     }
   };
 
@@ -123,12 +130,12 @@ export default function AlbumList() {
                     )}
                   </div>
                   <div className="p-4">
-                    <h3 className="font-semibold text-lg mb-1">{album.name}</h3>
+                    <h3 className="font-semibold text-lg mb-1">{album.name || album.title}</h3>
                     {album.description && (
                       <p className="text-sm text-gray-500 mb-2 line-clamp-2">{album.description}</p>
                     )}
                     <div className="flex items-center justify-between text-xs text-gray-400">
-                      <span>{album.imageCount || 0} images</span>
+                      <span>{album.imageCount || album.imageIds?.length || 0} images</span>
                       {album.isPublic && (
                         <span className="bg-green-100 text-green-800 px-2 py-1 rounded">Public</span>
                       )}
