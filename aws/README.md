@@ -15,14 +15,14 @@ cd aws
 cd aws
 
 # Set region
-export CDK_DEFAULT_REGION=eu-west-2
-export AWS_DEFAULT_REGION=eu-west-2
+export CDK_DEFAULT_REGION=eu-west-1
+export AWS_DEFAULT_REGION=eu-west-1
 
 # Bootstrap (first time only)
-npx cdk bootstrap --region eu-west-2
+npx cdk bootstrap --region eu-west-1
 
 # Deploy
-npx cdk deploy --region eu-west-2
+npx cdk deploy --region eu-west-1
 ```
 
 ## Prerequisites
@@ -77,13 +77,13 @@ npx cdk deploy --region eu-west-2
 
 ## Region
 
-All resources are deployed to **eu-west-2** (London) by default.
+All resources are deployed to **eu-west-1** (Ireland) by default.
 
 ## After Deployment
 
 1. **Create Rekognition Collection:**
    ```bash
-   aws rekognition create-collection --collection-id vinco-athletes --region eu-west-2
+   aws rekognition create-collection --collection-id vinco-athletes --region eu-west-1
    ```
 
 2. **Get deployment outputs:**

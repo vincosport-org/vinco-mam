@@ -47,7 +47,7 @@ This will output the built files to `wordpress-plugin/assets/build/`.
 2. Activate the plugin in WordPress admin
 
 3. Go to Vinco MAM > Settings and configure:
-   - AWS Region: `eu-west-2` (or your region)
+   - AWS Region: `eu-west-1` (or your region)
    - API Endpoint: From CDK deployment output
    - WebSocket Endpoint: From CDK deployment output
    - JWT Secret: Generate a secure random string

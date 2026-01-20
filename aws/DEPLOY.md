@@ -26,20 +26,20 @@
    npm install
    ```
 
-## Deploy to eu-west-2 (London)
+## Deploy to eu-west-1 (Ireland)
 
 ```bash
 cd aws
 
 # Set region explicitly
-export CDK_DEFAULT_REGION=eu-west-2
+export CDK_DEFAULT_REGION=eu-west-1
 export CDK_DEFAULT_ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
 
 # Bootstrap CDK (first time only for this account/region)
-npx cdk bootstrap --region eu-west-2
+npx cdk bootstrap --region eu-west-1
 
 # Deploy the stack
-npx cdk deploy --region eu-west-2
+npx cdk deploy --region eu-west-1
 ```
 
 ## What Will Be Created
@@ -84,7 +84,7 @@ npx cdk deploy --region eu-west-2
 
 2. Create Rekognition Collection:
    ```bash
-   aws rekognition create-collection --collection-id vinco-athletes --region eu-west-2
+   aws rekognition create-collection --collection-id vinco-athletes --region eu-west-1
    ```
 
 3. Update WordPress plugin settings with the API endpoints.

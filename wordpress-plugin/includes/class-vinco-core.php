@@ -55,7 +55,7 @@ class Vinco_MAM_Core {
         
         // Create options
         add_option('vinco_mam_settings', [
-            'aws_region' => 'eu-west-2',
+            'aws_region' => 'eu-west-1',
             'api_endpoint' => '',
             'websocket_endpoint' => '',
             'auto_approve_threshold' => 85,
