@@ -51,7 +51,7 @@ export default function Gallery() {
   });
 
   const handleImageClick = (image: Image) => {
-    navigate(`/page=vinco-mam-gallery/${image.imageId}`);
+    navigate(`/gallery/${image.imageId}`);
   };
 
   const handlePreviewClick = (image: Image) => {

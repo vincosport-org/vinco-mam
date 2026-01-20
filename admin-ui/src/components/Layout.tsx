@@ -35,8 +35,12 @@ export default function Layout({ children }: LayoutProps) {
 
   const isActive = (page: string, path: string) => {
     const currentPage = getCurrentPage();
-    return currentPage === page || location.pathname === path || 
-           (path !== '/' && location.pathname.startsWith(path));
+    // Special case: vinco-mam maps to /gallery
+    if (page === 'vinco-mam' && (location.pathname === '/gallery' || location.pathname === '/')) {
+      return currentPage === 'vinco-mam' || !currentPage;
+    }
+    return currentPage === page || location.pathname === path ||
+           (path !== '/' && path !== '/gallery' && location.pathname.startsWith(path));
   };
   
   return (
@@ -56,25 +60,11 @@ export default function Layout({ children }: LayoutProps) {
           <a
             href={window.location.pathname + '?page=vinco-mam'}
             className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
-              isActive('vinco-mam', '/')
+              isActive('vinco-mam', '/gallery')
                 ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-medium'
                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
             }`}
-            onClick={(e) => handleNavClick(e, 'vinco-mam', '/')}
-          >
-            <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-            Dashboard
-          </a>
-          <a
-            href={window.location.pathname + '?page=vinco-mam-gallery'}
-            className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
-              isActive('vinco-mam-gallery', '/gallery')
-                ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-medium'
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
-            }`}
-            onClick={(e) => handleNavClick(e, 'vinco-mam-gallery', '/gallery')}
+            onClick={(e) => handleNavClick(e, 'vinco-mam', '/gallery')}
           >
             <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />

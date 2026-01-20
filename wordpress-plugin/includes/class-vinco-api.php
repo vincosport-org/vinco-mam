@@ -2,12 +2,12 @@
 // includes/class-vinco-api.php
 
 class Vinco_MAM_API {
-    
+
     private $aws_endpoint;
-    
+
     public function __construct() {
-        $settings = get_option('vinco_mam_settings');
-        $this->aws_endpoint = $settings['api_endpoint'] ?? '';
+        // Use hardcoded config instead of database settings
+        $this->aws_endpoint = Vinco_MAM_Config::get_api_endpoint();
     }
     
     public function register_routes() {
@@ -157,8 +157,7 @@ class Vinco_MAM_API {
     
     private function generate_jwt() {
         $user = wp_get_current_user();
-        $settings = get_option('vinco_mam_settings');
-        
+
         $payload = [
             'sub' => $user->ID,
             'email' => $user->user_email,
@@ -167,10 +166,10 @@ class Vinco_MAM_API {
             'iat' => time(),
             'exp' => time() + 3600,
         ];
-        
-        // Sign with shared secret (in production, use proper key management)
-        $secret = $settings['jwt_secret'] ?? '';
-        
+
+        // Get JWT secret from config (checks wp-config.php first, then falls back to database)
+        $secret = Vinco_MAM_Config::get_jwt_secret();
+
         return $this->jwt_encode($payload, $secret);
     }
     

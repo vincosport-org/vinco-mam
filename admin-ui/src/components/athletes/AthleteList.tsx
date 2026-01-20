@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { athletes } from '../../services/api';
 import { LoadingSpinner, Button, Input, Modal } from '../common';
+import toast from 'react-hot-toast';
 
 interface Athlete {
   athleteId: string;
@@ -32,7 +33,7 @@ export default function AthleteList() {
 
   const handleCreate = async () => {
     if (!newAthlete.name.trim()) {
-      alert('Name is required');
+      toast.error('Name is required');
       return;
     }
 
@@ -42,11 +43,12 @@ export default function AthleteList() {
         nationality: newAthlete.nationality || undefined,
         dateOfBirth: newAthlete.dateOfBirth || undefined,
       });
+      toast.success('Athlete created');
       setCreateModalOpen(false);
       setNewAthlete({ name: '', nationality: '', dateOfBirth: '' });
       refetch();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to create athlete');
+      toast.error(error.response?.data?.message || 'Failed to create athlete');
     }
   };
 
@@ -100,7 +102,7 @@ export default function AthleteList() {
                 <div
                   key={athlete.athleteId}
                   className="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-lg transition-shadow"
-                  onClick={() => navigate(`/page=vinco-mam-athletes/${athlete.athleteId}`)}
+                  onClick={() => navigate(`/athletes/${athlete.athleteId}`)}
                 >
                   <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 mb-4">
                     {athlete.headshotUrl ? (

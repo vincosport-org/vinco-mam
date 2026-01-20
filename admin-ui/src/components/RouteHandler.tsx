@@ -12,8 +12,7 @@ export default function RouteHandler() {
     
     if (pageParam) {
       const pageMap: Record<string, string> = {
-        'vinco-mam': '/',
-        'vinco-mam-gallery': '/gallery',
+        'vinco-mam': '/gallery',
         'vinco-mam-validation': '/validation',
         'vinco-mam-athletes': '/athletes',
         'vinco-mam-albums': '/albums',
@@ -21,12 +20,12 @@ export default function RouteHandler() {
         'vinco-mam-users': '/users',
         'vinco-mam-settings': '/settings',
       };
-      
+
       const targetPath = pageMap[pageParam];
       if (targetPath) {
         // Check if hash matches target path
         const currentHash = window.location.hash.slice(1) || '/';
-        if (currentHash !== targetPath) {
+        if (currentHash !== targetPath && currentHash !== '/gallery' || (pageParam === 'vinco-mam' && currentHash === '/')) {
           // Update hash which will trigger React Router navigation
           window.location.hash = targetPath;
           // Also navigate with React Router
@@ -57,8 +56,7 @@ export default function RouteHandler() {
       
       if (pageParam) {
         const pageMap: Record<string, string> = {
-          'vinco-mam': '/',
-          'vinco-mam-gallery': '/gallery',
+          'vinco-mam': '/gallery',
           'vinco-mam-validation': '/validation',
           'vinco-mam-athletes': '/athletes',
           'vinco-mam-albums': '/albums',
@@ -66,7 +64,7 @@ export default function RouteHandler() {
           'vinco-mam-users': '/users',
           'vinco-mam-settings': '/settings',
         };
-        
+
         const targetPath = pageMap[pageParam];
         if (targetPath) {
           const currentHash = window.location.hash.slice(1) || '/';

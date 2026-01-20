@@ -102,7 +102,7 @@ export default function Dashboard() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => navigate('/page=vinco-mam-gallery')}
+                  onClick={() => navigate('/gallery')}
                 >
                   View All
                 </Button>
@@ -112,7 +112,7 @@ export default function Dashboard() {
                   <div
                     key={image.imageId}
                     className="cursor-pointer group"
-                    onClick={() => navigate(`/page=vinco-mam-gallery/${image.imageId}`)}
+                    onClick={() => navigate(`/gallery/${image.imageId}`)}
                   >
                     <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
                       <img
@@ -133,21 +133,21 @@ export default function Dashboard() {
             <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Button
-                onClick={() => navigate('/page=vinco-mam-gallery')}
+                onClick={() => navigate('/gallery')}
                 className="w-full"
               >
                 Browse Gallery
               </Button>
               <Button
                 variant="secondary"
-                onClick={() => navigate('/page=vinco-mam-albums')}
+                onClick={() => navigate('/albums')}
                 className="w-full"
               >
                 Create Album
               </Button>
               <Button
                 variant="outline"
-                onClick={() => navigate('/page=vinco-mam-athletes')}
+                onClick={() => navigate('/athletes')}
                 className="w-full"
               >
                 Add Athlete

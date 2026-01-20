@@ -17,10 +17,11 @@ export const images = {
   update: (imageId: string, data: any) => api.put(`images/${imageId}`, data),
   saveEdits: (imageId: string, edits: any) => api.post(`images/${imageId}/edits`, { edits }),
   getVersions: (imageId: string) => api.get(`images/${imageId}/versions`),
-  revert: (imageId: string, versionTimestamp: string) => 
+  revert: (imageId: string, versionTimestamp: string) =>
     api.post(`images/${imageId}/revert/${versionTimestamp}`),
   export: (imageId: string, settings: any) => api.post(`images/${imageId}/export`, settings),
   download: (imageId: string) => api.get(`images/${imageId}/download/original`),
+  getExportPresets: () => api.get('export-presets'),
 };
 
 // Albums API

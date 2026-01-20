@@ -10,7 +10,6 @@ import { KeyboardShortcutsProvider } from './context/KeyboardShortcutsContext';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import Layout from './components/Layout';
 import RouteHandler from './components/RouteHandler';
-import Dashboard from './components/dashboard/Dashboard';
 import Gallery from './components/gallery/Gallery';
 import ImageEditor from './components/editor/ImageEditor';
 import ValidationQueue from './components/validation/ValidationQueue';
@@ -60,8 +59,7 @@ export default function App() {
     
     if (pageParam) {
       const pageMap: Record<string, string> = {
-        'vinco-mam': '/',
-        'vinco-mam-gallery': '/gallery',
+        'vinco-mam': '/gallery',
         'vinco-mam-validation': '/validation',
         'vinco-mam-athletes': '/athletes',
         'vinco-mam-albums': '/albums',
@@ -87,10 +85,8 @@ export default function App() {
               <Layout>
                 <RouteHandler />
                 <Routes>
-                {/* Dashboard */}
-                <Route path="/" element={<Dashboard />} />
-                
-                {/* Gallery */}
+                {/* Gallery is the main view */}
+                <Route path="/" element={<Gallery />} />
                 <Route path="/gallery" element={<Gallery />} />
                 <Route path="/gallery/:imageId" element={<ImageEditor />} />
                 

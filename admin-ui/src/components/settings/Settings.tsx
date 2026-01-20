@@ -3,29 +3,19 @@ import { Button, Input, FormField, Skeleton } from '../common';
 import toast from 'react-hot-toast';
 
 interface Settings {
-  aws_region: string;
-  api_endpoint: string;
-  websocket_endpoint: string;
   auto_approve_threshold: number;
   review_threshold: number;
   edit_version_retention_days: number;
-  jwt_secret: string;
   filemage_api_token: string;
-  filemage_api_url: string;
   filemage_watch_folders: string;
 }
 
 export default function Settings() {
   const [settings, setSettings] = useState<Settings>({
-    aws_region: 'eu-west-1',
-    api_endpoint: '',
-    websocket_endpoint: '',
     auto_approve_threshold: 85,
     review_threshold: 50,
     edit_version_retention_days: 90,
-    jwt_secret: '',
     filemage_api_token: '',
-    filemage_api_url: '',
     filemage_watch_folders: '',
   });
   const [saving, setSaving] = useState(false);
@@ -39,15 +29,10 @@ export default function Settings() {
     try {
       const current = window.vincoMAM?.settings || {};
       setSettings({
-        aws_region: current.aws_region || 'eu-west-1',
-        api_endpoint: current.api_endpoint || '',
-        websocket_endpoint: current.websocket_endpoint || '',
         auto_approve_threshold: current.auto_approve_threshold || 85,
         review_threshold: current.review_threshold || 50,
         edit_version_retention_days: current.edit_version_retention_days || 90,
-        jwt_secret: current.jwt_secret || '',
         filemage_api_token: current.filemage_api_token || '',
-        filemage_api_url: current.filemage_api_url || '',
         filemage_watch_folders: current.filemage_watch_folders || '',
       });
     } catch (error) {
@@ -145,43 +130,19 @@ export default function Settings() {
       {/* General Settings */}
       {activeTab === 'general' && (
         <div className="space-y-6">
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">AWS Configuration</h2>
-            
-            <div className="space-y-4">
-              <Input
-                label="AWS Region"
-                type="text"
-                value={settings.aws_region}
-                onChange={(e) => handleChange('aws_region', e.target.value)}
-                placeholder="eu-west-1"
-              />
-
-              <Input
-                label="API Gateway Endpoint"
-                type="url"
-                value={settings.api_endpoint}
-                onChange={(e) => handleChange('api_endpoint', e.target.value)}
-                placeholder="https://xxxxx.execute-api.eu-west-1.amazonaws.com/prod"
-                helperText="Get this from AWS CDK deployment outputs"
-              />
-
-              <Input
-                label="WebSocket Endpoint"
-                type="url"
-                value={settings.websocket_endpoint}
-                onChange={(e) => handleChange('websocket_endpoint', e.target.value)}
-                placeholder="wss://xxxxx.execute-api.eu-west-1.amazonaws.com/prod"
-                helperText="Optional - for real-time updates"
-              />
-
-              <Input
-                label="JWT Secret"
-                type="password"
-                value={settings.jwt_secret}
-                onChange={(e) => handleChange('jwt_secret', e.target.value)}
-                helperText="Shared secret for JWT token signing"
-              />
+          {/* AWS Configuration Notice */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-start">
+              <svg className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              <div>
+                <h3 className="text-sm font-medium text-blue-800">AWS Configuration</h3>
+                <p className="text-sm text-blue-700 mt-1">
+                  AWS endpoints, S3 buckets, and DynamoDB tables are hardcoded in the plugin configuration.
+                  JWT secret should be defined in <code className="bg-blue-100 px-1 rounded">wp-config.php</code> as <code className="bg-blue-100 px-1 rounded">VINCO_JWT_SECRET</code>.
+                </p>
+              </div>
             </div>
           </div>
 
@@ -228,24 +189,18 @@ export default function Settings() {
         <div className="space-y-6">
           <div className="bg-white shadow rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4">FileMage FTP Configuration</h2>
-            
+
             <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded">
               <p className="text-sm text-blue-800">
-                <strong>FileMage API Token:</strong> Create an API token in FileMage by going to Settings → API Tokens → Add.
+                <strong>FileMage Server:</strong> <code className="bg-blue-100 px-1 rounded">https://ftp.vincosport.com</code>
+              </p>
+              <p className="text-sm text-blue-800 mt-2">
+                <strong>API Token:</strong> Create an API token in FileMage by going to Settings → API Tokens → Add.
                 See <a href="https://docs.filemage.io/administrators.html#api-tokens" target="_blank" rel="noopener noreferrer" className="underline">FileMage Documentation</a> for details.
               </p>
             </div>
 
             <div className="space-y-4">
-              <Input
-                label="FileMage API URL"
-                type="url"
-                value={settings.filemage_api_url}
-                onChange={(e) => handleChange('filemage_api_url', e.target.value)}
-                placeholder="https://your-filemage-instance.com/api"
-                helperText="Base URL of your FileMage instance API"
-              />
-
               <Input
                 label="FileMage API Token"
                 type="password"

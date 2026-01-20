@@ -90,7 +90,7 @@ export default function AthleteDetail() {
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
           {error instanceof Error ? error.message : 'Athlete not found'}
         </div>
-        <Button variant="outline" onClick={() => navigate('/page=vinco-mam-athletes')}>
+        <Button variant="outline" onClick={() => navigate('/athletes')}>
           Back to Athletes
         </Button>
       </div>
@@ -100,7 +100,7 @@ export default function AthleteDetail() {
   return (
     <div className="p-6">
       <div className="flex items-center gap-4 mb-6">
-        <Button variant="outline" onClick={() => navigate('/page=vinco-mam-athletes')}>
+        <Button variant="outline" onClick={() => navigate('/athletes')}>
           ← Back
         </Button>
         <h1 className="text-2xl font-bold">Athlete Details</h1>
@@ -223,7 +223,7 @@ export default function AthleteDetail() {
                     key={image.imageId}
                     src={image.signedUrls?.thumbnail || image.signedUrls?.proxy || ''}
                     alt={image.filename}
-                    onClick={() => navigate(`/page=vinco-mam-gallery/${image.imageId}`)}
+                    onClick={() => navigate(`/gallery/${image.imageId}`)}
                   />
                 ))}
               </div>

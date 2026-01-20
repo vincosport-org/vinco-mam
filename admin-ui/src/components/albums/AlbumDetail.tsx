@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { albums, images } from '../../services/api';
@@ -17,10 +17,18 @@ export default function AlbumDetail() {
     description: '',
     isPublic: false,
   });
+  const [formInitialized, setFormInitialized] = useState(false);
 
   const { data: albumData, isLoading } = useQuery({
     queryKey: ['album', albumId],
     queryFn: () => albums.list(),
+    enabled: !!albumId,
+  });
+
+  // Fetch actual image data for album images
+  const { data: albumImagesData } = useQuery({
+    queryKey: ['album-images', albumId],
+    queryFn: () => images.list({ albumId, limit: 500 }),
     enabled: !!albumId,
   });
 
@@ -33,17 +41,21 @@ export default function AlbumDetail() {
   // Handle response structure: axios wraps in .data, then API returns { albums: [...] }
   const albumsArray: any[] = (albumData?.data as any)?.albums || (albumData?.data as any) || [];
   const album = albumsArray.find((a: any) => a.albumId === albumId);
-  const albumImages = album?.imageIds?.map((id: string) => ({ imageId: id })) || [];
+  // Use fetched image data with full details (thumbnails, etc.)
+  const albumImages = albumImagesData?.data?.images || [];
   const allImages = allImagesData?.data?.images || [];
 
-  // Initialize form data
-  if (album && !editing && formData.name === '') {
-    setFormData({
-      name: album.title || album.name || '',
-      description: album.description || '',
-      isPublic: album.isPublic || false,
-    });
-  }
+  // Initialize form data using useEffect to avoid render-time state updates
+  useEffect(() => {
+    if (album && !formInitialized) {
+      setFormData({
+        name: album.title || album.name || '',
+        description: album.description || '',
+        isPublic: album.isPublic || false,
+      });
+      setFormInitialized(true);
+    }
+  }, [album, formInitialized]);
 
   const updateMutation = useMutation({
     mutationFn: (data: any) => albums.update(albumId!, {
@@ -110,7 +122,7 @@ export default function AlbumDetail() {
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
           Album not found
         </div>
-        <Button variant="outline" onClick={() => navigate('/page=vinco-mam-albums')}>
+        <Button variant="outline" onClick={() => navigate('/albums')}>
           Back to Albums
         </Button>
       </div>
@@ -120,7 +132,7 @@ export default function AlbumDetail() {
   return (
     <div className="p-6">
       <div className="flex items-center gap-4 mb-6">
-        <Button variant="outline" onClick={() => navigate('/page=vinco-mam-albums')}>
+        <Button variant="outline" onClick={() => navigate('/albums')}>
           ← Back
         </Button>
         <h1 className="text-2xl font-bold">{album.name}</h1>
@@ -164,7 +176,7 @@ export default function AlbumDetail() {
                     onClick={() => {
                       setEditing(false);
                       setFormData({
-                        name: album.name || '',
+                        name: album.title || album.name || '',
                         description: album.description || '',
                         isPublic: album.isPublic || false,
                       });
@@ -233,7 +245,7 @@ export default function AlbumDetail() {
                     key={image.imageId}
                     src={image.signedUrls?.thumbnail || image.signedUrls?.proxy || ''}
                     alt={image.filename}
-                    onClick={() => navigate(`/page=vinco-mam-gallery/${image.imageId}`)}
+                    onClick={() => navigate(`/gallery/${image.imageId}`)}
                   />
                 ))}
               </div>

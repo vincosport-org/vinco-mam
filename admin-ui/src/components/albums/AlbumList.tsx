@@ -114,7 +114,7 @@ export default function AlbumList() {
                 <div
                   key={album.albumId}
                   className="bg-white rounded-lg shadow cursor-pointer hover:shadow-lg transition-shadow overflow-hidden"
-                  onClick={() => navigate(`/page=vinco-mam-albums/${album.albumId}`)}
+                  onClick={() => navigate(`/albums/${album.albumId}`)}
                 >
                   <div className="aspect-square bg-gray-100">
                     {album.coverImageUrl ? (
