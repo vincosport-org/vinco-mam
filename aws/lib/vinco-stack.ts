@@ -519,10 +519,61 @@ export class VincoStack extends cdk.Stack {
     queueItem.addResource('reject').addMethod('POST', new apigateway.LambdaIntegration(validationReject));
     queueItem.addResource('reassign').addMethod('POST', new apigateway.LambdaIntegration(validationReassign));
 
+    // Athletes API (proxies to WordPress)
+    const athletesList = new lambda.Function(this, 'AthletesList', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'list.handler',
+      code: lambda.Code.fromAsset('lambda/api/athletes'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
+    const athletesCreate = new lambda.Function(this, 'AthletesCreate', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'create.handler',
+      code: lambda.Code.fromAsset('lambda/api/athletes'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
+    const athletesUpdate = new lambda.Function(this, 'AthletesUpdate', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'update.handler',
+      code: lambda.Code.fromAsset('lambda/api/athletes'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
+    const athletesUploadHeadshot = new lambda.Function(this, 'AthletesUploadHeadshot', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'uploadHeadshot.handler',
+      code: lambda.Code.fromAsset('lambda/api/athletes'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
+    imagesBucket.grantReadWrite(athletesUploadHeadshot);
+
     // Events API (proxies to WordPress)
     const eventsList = new lambda.Function(this, 'EventsList', {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: 'list.handler',
+      code: lambda.Code.fromAsset('lambda/api/events'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
+    const eventsGetSchedule = new lambda.Function(this, 'EventsGetSchedule', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'getSchedule.handler',
+      code: lambda.Code.fromAsset('lambda/api/events'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
+    const eventsGetResults = new lambda.Function(this, 'EventsGetResults', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'getResults.handler',
       code: lambda.Code.fromAsset('lambda/api/events'),
       layers: [sharedLayer],
       environment: apiCommonEnv,
@@ -537,12 +588,46 @@ export class VincoStack extends cdk.Stack {
       environment: apiCommonEnv,
     });
 
+    const videosGet = new lambda.Function(this, 'VideosGet', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'get.handler',
+      code: lambda.Code.fromAsset('lambda/api/videos'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
     imagesTable.grantReadData(videosList);
+    imagesTable.grantReadData(videosGet);
+    imagesBucket.grantRead(videosGet);
 
     // Users API (proxies to WordPress)
     const usersList = new lambda.Function(this, 'UsersList', {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: 'list.handler',
+      code: lambda.Code.fromAsset('lambda/api/users'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
+    const usersCreate = new lambda.Function(this, 'UsersCreate', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'create.handler',
+      code: lambda.Code.fromAsset('lambda/api/users'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
+    const photographersList = new lambda.Function(this, 'PhotographersList', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'photographers/list.handler',
+      code: lambda.Code.fromAsset('lambda/api/users'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
+    const photographersCreate = new lambda.Function(this, 'PhotographersCreate', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'photographers/create.handler',
       code: lambda.Code.fromAsset('lambda/api/users'),
       layers: [sharedLayer],
       environment: apiCommonEnv,
@@ -560,10 +645,35 @@ export class VincoStack extends cdk.Stack {
     imagesTable.grantReadData(search);
     albumsTable.grantReadData(search);
 
-    // Additional API Routes
-    api.root.addResource('events').addMethod('GET', new apigateway.LambdaIntegration(eventsList));
-    api.root.addResource('videos').addMethod('GET', new apigateway.LambdaIntegration(videosList));
-    api.root.addResource('users').addMethod('GET', new apigateway.LambdaIntegration(usersList));
+    // Athletes API Routes
+    const athletes = api.root.addResource('athletes');
+    athletes.addMethod('GET', new apigateway.LambdaIntegration(athletesList));
+    athletes.addMethod('POST', new apigateway.LambdaIntegration(athletesCreate));
+    const athlete = athletes.addResource('{athleteId}');
+    athlete.addMethod('PUT', new apigateway.LambdaIntegration(athletesUpdate));
+    athlete.addResource('headshot').addMethod('POST', new apigateway.LambdaIntegration(athletesUploadHeadshot));
+
+    // Events API Routes
+    const events = api.root.addResource('events');
+    events.addMethod('GET', new apigateway.LambdaIntegration(eventsList));
+    const event = events.addResource('{eventId}');
+    event.addResource('schedule').addMethod('GET', new apigateway.LambdaIntegration(eventsGetSchedule));
+    const schedule = event.addResource('schedule').addResource('{scheduleId}');
+    schedule.addResource('results').addMethod('GET', new apigateway.LambdaIntegration(eventsGetResults));
+
+    // Videos API Routes
+    const videos = api.root.addResource('videos');
+    videos.addMethod('GET', new apigateway.LambdaIntegration(videosList));
+    videos.addResource('{mediaId}').addMethod('GET', new apigateway.LambdaIntegration(videosGet));
+
+    // Users API Routes
+    const users = api.root.addResource('users');
+    users.addMethod('GET', new apigateway.LambdaIntegration(usersList));
+    users.addMethod('POST', new apigateway.LambdaIntegration(usersCreate));
+    users.addResource('photographers').addMethod('GET', new apigateway.LambdaIntegration(photographersList));
+    users.addResource('photographers').addMethod('POST', new apigateway.LambdaIntegration(photographersCreate));
+
+    // Search API Route
     api.root.addResource('search').addMethod('GET', new apigateway.LambdaIntegration(search));
 
     // WebSocket Lambda Functions
