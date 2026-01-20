@@ -308,7 +308,7 @@ export class VincoStack extends cdk.Stack {
       description: 'WebSocket API endpoint for real-time updates',
     });
 
-    new cdk.CfnOutput(this, 'PlatformStorageBucket', {
+    new cdk.CfnOutput(this, 'PlatformStorageBucketName', {
       value: platformStorageBucket.bucketName,
       description: 'S3 bucket for platform storage and backups',
     });
