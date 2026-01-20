@@ -491,6 +491,53 @@ export class VincoStack extends cdk.Stack {
     queueItem.addResource('reject').addMethod('POST', new apigateway.LambdaIntegration(validationReject));
     queueItem.addResource('reassign').addMethod('POST', new apigateway.LambdaIntegration(validationReassign));
 
+    // Events API (proxies to WordPress)
+    const eventsList = new lambda.Function(this, 'EventsList', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'list.handler',
+      code: lambda.Code.fromAsset('lambda/api/events'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
+    // Videos API
+    const videosList = new lambda.Function(this, 'VideosList', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'list.handler',
+      code: lambda.Code.fromAsset('lambda/api/videos'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
+    imagesTable.grantReadData(videosList);
+
+    // Users API (proxies to WordPress)
+    const usersList = new lambda.Function(this, 'UsersList', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'list.handler',
+      code: lambda.Code.fromAsset('lambda/api/users'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
+    // Search API
+    const search = new lambda.Function(this, 'Search', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'index.handler',
+      code: lambda.Code.fromAsset('lambda/api/search'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
+    imagesTable.grantReadData(search);
+    albumsTable.grantReadData(search);
+
+    // Additional API Routes
+    api.root.addResource('events').addMethod('GET', new apigateway.LambdaIntegration(eventsList));
+    api.root.addResource('videos').addMethod('GET', new apigateway.LambdaIntegration(videosList));
+    api.root.addResource('users').addMethod('GET', new apigateway.LambdaIntegration(usersList));
+    api.root.addResource('search').addMethod('GET', new apigateway.LambdaIntegration(search));
+
     // WebSocket Lambda Functions
     const wsConnect = new lambda.Function(this, 'WebSocketConnect', {
       runtime: lambda.Runtime.NODEJS_20_X,
