@@ -17,6 +17,33 @@ class Vinco_MAM_API {
             'callback' => [$this, 'proxy_request'],
             'permission_callback' => [$this, 'check_permission'],
         ]);
+
+        // Settings endpoint (save settings)
+        register_rest_route('vinco-mam/v1', '/settings', [
+            'methods' => ['GET', 'POST'],
+            'callback' => [$this, 'handle_settings'],
+            'permission_callback' => function() {
+                return current_user_can('manage_options');
+            },
+        ]);
+    }
+    
+    public function handle_settings($request) {
+        if ($request->get_method() === 'GET') {
+            $settings = get_option('vinco_mam_settings', []);
+            return new WP_REST_Response($settings, 200);
+        } else {
+            // POST - save settings
+            $input = $request->get_json_params();
+            $settings_handler = new Vinco_MAM_Settings();
+            $sanitized = $settings_handler->sanitize_settings($input);
+            update_option('vinco_mam_settings', $sanitized);
+            
+            // Update AWS Lambda environment variable for watch folders
+            // This would need to be done via AWS SDK or manual update
+            
+            return new WP_REST_Response(['success' => true, 'settings' => $sanitized], 200);
+        }
     }
     
     public function check_permission($request) {

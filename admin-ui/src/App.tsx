@@ -45,11 +45,31 @@ declare global {
 export default function App() {
   const { user, capabilities } = useUserStore();
   
-  // Initialize user store from WordPress data
+  // Initialize user store from WordPress data and handle routing
   useEffect(() => {
     if (window.vincoMAM?.user) {
       useUserStore.getState().setUser(window.vincoMAM.user);
       useUserStore.getState().setCapabilities(window.vincoMAM.user.capabilities || []);
+    }
+    
+    // Handle WordPress page routing based on currentPage
+    const currentPage = window.vincoMAM?.currentPage;
+    if (currentPage) {
+      const pageMap: Record<string, string> = {
+        'vinco-mam': '/',
+        'vinco-mam-gallery': '/gallery',
+        'vinco-mam-validation': '/validation',
+        'vinco-mam-athletes': '/athletes',
+        'vinco-mam-albums': '/albums',
+        'vinco-mam-videos': '/videos',
+        'vinco-mam-users': '/users',
+        'vinco-mam-settings': '/settings',
+      };
+      
+      const targetPath = pageMap[currentPage];
+      if (targetPath && !window.location.hash.includes(targetPath)) {
+        window.location.hash = targetPath;
+      }
     }
   }, []);
   
@@ -57,39 +77,54 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <WebSocketProvider>
         <KeyboardShortcutsProvider>
-          <BrowserRouter basename="/wp-admin/admin.php">
+          <BrowserRouter>
             <Layout>
               <Routes>
                 {/* Dashboard */}
-                <Route path="/" element={<Navigate to="/page=vinco-mam" replace />} />
+                <Route path="/" element={<Dashboard />} />
                 <Route path="/page=vinco-mam" element={<Dashboard />} />
+                <Route path="/page=vinco-mam-gallery" element={<Dashboard />} />
                 
                 {/* Gallery */}
-                <Route path="/page=vinco-mam-gallery" element={<Gallery />} />
-                <Route path="/page=vinco-mam-gallery/:imageId" element={<ImageEditor />} />
+                <Route path="/gallery" element={<Gallery />} />
+                <Route path="/gallery/:imageId" element={<ImageEditor />} />
                 
                 {/* Validation */}
                 {capabilities.includes('validateRecognition') && (
-                  <Route path="/page=vinco-mam-validation" element={<ValidationQueue />} />
+                  <>
+                    <Route path="/validation" element={<ValidationQueue />} />
+                    <Route path="/page=vinco-mam-validation" element={<ValidationQueue />} />
+                  </>
                 )}
                 
                 {/* Athletes */}
+                <Route path="/athletes" element={<AthleteList />} />
                 <Route path="/page=vinco-mam-athletes" element={<AthleteList />} />
+                <Route path="/athletes/:athleteId" element={<AthleteDetail />} />
                 <Route path="/page=vinco-mam-athletes/:athleteId" element={<AthleteDetail />} />
                 
                 {/* Albums */}
+                <Route path="/albums" element={<AlbumList />} />
                 <Route path="/page=vinco-mam-albums" element={<AlbumList />} />
+                <Route path="/albums/:albumId" element={<AlbumDetail />} />
                 <Route path="/page=vinco-mam-albums/:albumId" element={<AlbumDetail />} />
                 
                 {/* Videos */}
+                <Route path="/videos" element={<VideoList />} />
                 <Route path="/page=vinco-mam-videos" element={<VideoList />} />
                 
                 {/* Admin */}
                 {capabilities.includes('manageUsers') && (
-                  <Route path="/page=vinco-mam-users" element={<UserManagement />} />
+                  <>
+                    <Route path="/users" element={<UserManagement />} />
+                    <Route path="/page=vinco-mam-users" element={<UserManagement />} />
+                  </>
                 )}
                 {capabilities.includes('manageSettings') && (
-                  <Route path="/page=vinco-mam-settings" element={<Settings />} />
+                  <>
+                    <Route path="/settings" element={<Settings />} />
+                    <Route path="/page=vinco-mam-settings" element={<Settings />} />
+                  </>
                 )}
               </Routes>
             </Layout>

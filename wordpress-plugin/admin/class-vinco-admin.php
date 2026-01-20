@@ -110,9 +110,18 @@ class Vinco_MAM_Admin {
     }
     
     private function get_current_page() {
+        // Get page from query string or screen
+        if (isset($_GET['page'])) {
+            return sanitize_text_field($_GET['page']);
+        }
+        
         $screen = get_current_screen();
-        $page = str_replace('toplevel_page_', '', $screen->id);
-        $page = str_replace('vinco-mam_page_', '', $page);
-        return $page;
+        if ($screen) {
+            $page = str_replace('toplevel_page_', '', $screen->id);
+            $page = str_replace('vinco-mam_page_', '', $page);
+            return $page;
+        }
+        
+        return 'vinco-mam';
     }
 }

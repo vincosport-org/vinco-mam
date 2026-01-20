@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 interface LayoutProps {
@@ -7,6 +7,13 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
+  const [canManageSettings, setCanManageSettings] = useState(false);
+  
+  useEffect(() => {
+    const canManage = typeof window !== 'undefined' && 
+      window.vincoMAM?.user?.capabilities?.includes('manageSettings');
+    setCanManageSettings(!!canManage);
+  }, []);
   
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
@@ -20,9 +27,9 @@ export default function Layout({ children }: LayoutProps) {
         
         <nav className="mt-4">
           <Link
-            to="/page=vinco-mam"
+            to="/"
             className={`block px-4 py-2 ${
-              location.pathname === '/page=vinco-mam'
+              location.pathname === '/' || location.pathname === '/page=vinco-mam'
                 ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
             }`}
@@ -30,9 +37,9 @@ export default function Layout({ children }: LayoutProps) {
             Dashboard
           </Link>
           <Link
-            to="/page=vinco-mam-gallery"
+            to="/gallery"
             className={`block px-4 py-2 ${
-              location.pathname.startsWith('/page=vinco-mam-gallery')
+              location.pathname.startsWith('/gallery')
                 ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
             }`}
@@ -40,9 +47,9 @@ export default function Layout({ children }: LayoutProps) {
             Gallery
           </Link>
           <Link
-            to="/page=vinco-mam-validation"
+            to="/validation"
             className={`block px-4 py-2 ${
-              location.pathname === '/page=vinco-mam-validation'
+              location.pathname.startsWith('/validation')
                 ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
             }`}
@@ -50,9 +57,9 @@ export default function Layout({ children }: LayoutProps) {
             Validation
           </Link>
           <Link
-            to="/page=vinco-mam-athletes"
+            to="/athletes"
             className={`block px-4 py-2 ${
-              location.pathname.startsWith('/page=vinco-mam-athletes')
+              location.pathname.startsWith('/athletes')
                 ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
             }`}
@@ -60,9 +67,9 @@ export default function Layout({ children }: LayoutProps) {
             Athletes
           </Link>
           <Link
-            to="/page=vinco-mam-albums"
+            to="/albums"
             className={`block px-4 py-2 ${
-              location.pathname.startsWith('/page=vinco-mam-albums')
+              location.pathname.startsWith('/albums')
                 ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
             }`}
@@ -70,15 +77,27 @@ export default function Layout({ children }: LayoutProps) {
             Albums
           </Link>
           <Link
-            to="/page=vinco-mam-videos"
+            to="/videos"
             className={`block px-4 py-2 ${
-              location.pathname === '/page=vinco-mam-videos'
+              location.pathname.startsWith('/videos')
                 ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
             }`}
           >
             Videos
           </Link>
+          {canManageSettings && (
+            <Link
+              to="/settings"
+              className={`block px-4 py-2 ${
+                location.pathname.startsWith('/settings')
+                  ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+              }`}
+            >
+              Settings
+            </Link>
+          )}
         </nav>
       </aside>
       

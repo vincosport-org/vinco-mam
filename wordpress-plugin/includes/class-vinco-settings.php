@@ -22,6 +22,11 @@ class Vinco_MAM_Settings {
         $sanitized['edit_version_retention_days'] = absint($input['edit_version_retention_days'] ?? 90);
         $sanitized['jwt_secret'] = sanitize_text_field($input['jwt_secret'] ?? '');
         
+        // FileMage settings
+        $sanitized['filemage_api_token'] = sanitize_text_field($input['filemage_api_token'] ?? '');
+        $sanitized['filemage_api_url'] = esc_url_raw($input['filemage_api_url'] ?? '');
+        $sanitized['filemage_watch_folders'] = sanitize_textarea_field($input['filemage_watch_folders'] ?? '');
+        
         return $sanitized;
     }
 }
