@@ -40,10 +40,10 @@ export function AdjustmentPanel({ edits, onChange, onReset }: AdjustmentPanelPro
   return (
     <div className="space-y-6 p-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Adjustments</h2>
+        <h2 className="text-lg font-semibold text-white">Adjustments</h2>
         <button
           onClick={onReset}
-          className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+          className="text-sm text-blue-400 hover:text-blue-300"
         >
           Reset All
         </button>
@@ -53,10 +53,10 @@ export function AdjustmentPanel({ edits, onChange, onReset }: AdjustmentPanelPro
         {adjustments.map((adj) => (
           <div key={adj.key}>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="text-sm font-medium text-gray-200">
                 {adj.label}
               </label>
-              <span className="text-sm text-gray-500 dark:text-gray-400 w-16 text-right">
+              <span className="text-sm text-gray-400 w-16 text-right">
                 {adj.value > 0 ? '+' : ''}{adj.value.toFixed(adj.step < 1 ? 1 : 0)}
               </span>
             </div>
@@ -67,7 +67,7 @@ export function AdjustmentPanel({ edits, onChange, onReset }: AdjustmentPanelPro
               step={adj.step}
               value={adj.value}
               onChange={(e) => onChange(adj.key, parseFloat(e.target.value))}
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+              className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer"
             />
           </div>
         ))}

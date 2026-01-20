@@ -64,6 +64,12 @@ class Vinco_MAM_Config {
     const PLUGIN_VERSION = '1.4.0';
 
     /**
+     * JWT Secret for authentication between WordPress and AWS
+     * This is hardcoded for this deployment - must match the secret configured in AWS Lambda
+     */
+    const JWT_SECRET = 'cmJEI38/SORAD+6iPYoeZzWUiDPN3JZelLbC8FjKukpHZwGg4soYhd+guppYpgG4';
+
+    /**
      * Get all configuration as array
      *
      * @return array Configuration values
@@ -120,18 +126,24 @@ class Vinco_MAM_Config {
     }
 
     /**
-     * Get JWT secret from wp-config.php
-     * Must be defined in wp-config.php as: define('VINCO_JWT_SECRET', 'your-secret-here');
+     * Get JWT secret
+     * Uses hardcoded constant, with fallback to wp-config.php constant
      *
-     * @return string|false JWT secret or false if not defined
+     * @return string JWT secret
      */
     public static function get_jwt_secret() {
+        // Use hardcoded constant (primary)
+        if (!empty(self::JWT_SECRET)) {
+            return self::JWT_SECRET;
+        }
+
+        // Fallback to wp-config.php constant
         if (defined('VINCO_JWT_SECRET')) {
             return VINCO_JWT_SECRET;
         }
 
-        // Fallback to database option (for backwards compatibility)
+        // Last resort fallback to database (for backwards compatibility)
         $settings = get_option('vinco_mam_settings', []);
-        return $settings['jwt_secret'] ?? false;
+        return $settings['jwt_secret'] ?? '';
     }
 }

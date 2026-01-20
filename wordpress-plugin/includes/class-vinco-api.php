@@ -11,14 +11,7 @@ class Vinco_MAM_API {
     }
     
     public function register_routes() {
-        // Proxy all requests to AWS API Gateway
-        register_rest_route('vinco-mam/v1', '/(?P<path>.+)', [
-            'methods' => ['GET', 'POST', 'PUT', 'DELETE'],
-            'callback' => [$this, 'proxy_request'],
-            'permission_callback' => [$this, 'check_permission'],
-        ]);
-
-        // Settings endpoint (save settings)
+        // Settings endpoint - MUST be registered BEFORE the catch-all route
         register_rest_route('vinco-mam/v1', '/settings', [
             'methods' => ['GET', 'POST'],
             'callback' => [$this, 'handle_settings'],
@@ -26,6 +19,65 @@ class Vinco_MAM_API {
                 return current_user_can('manage_options');
             },
         ]);
+
+        // Export presets endpoint
+        register_rest_route('vinco-mam/v1', '/export-presets', [
+            'methods' => ['GET'],
+            'callback' => [$this, 'handle_export_presets'],
+            'permission_callback' => function() {
+                return is_user_logged_in();
+            },
+        ]);
+
+        // Proxy all other requests to AWS API Gateway (catch-all - must be last)
+        register_rest_route('vinco-mam/v1', '/(?P<path>.+)', [
+            'methods' => ['GET', 'POST', 'PUT', 'DELETE'],
+            'callback' => [$this, 'proxy_request'],
+            'permission_callback' => [$this, 'check_permission'],
+        ]);
+    }
+
+    public function handle_export_presets($request) {
+        // Return default export presets (these could be stored in the database later)
+        $presets = [
+            [
+                'presetId' => 'web-large',
+                'name' => 'Web (Large)',
+                'format' => 'JPEG',
+                'quality' => 85,
+                'maxPixels' => 2048 * 2048,
+                'colorSpace' => 'SRGB',
+                'metadata' => 'COPYRIGHT',
+            ],
+            [
+                'presetId' => 'web-medium',
+                'name' => 'Web (Medium)',
+                'format' => 'JPEG',
+                'quality' => 80,
+                'maxPixels' => 1200 * 1200,
+                'colorSpace' => 'SRGB',
+                'metadata' => 'NONE',
+            ],
+            [
+                'presetId' => 'social-media',
+                'name' => 'Social Media',
+                'format' => 'JPEG',
+                'quality' => 90,
+                'maxPixels' => 1080 * 1080,
+                'colorSpace' => 'SRGB',
+                'metadata' => 'NONE',
+            ],
+            [
+                'presetId' => 'print-high',
+                'name' => 'Print (High Quality)',
+                'format' => 'TIFF',
+                'quality' => 100,
+                'colorSpace' => 'ADOBE_RGB',
+                'metadata' => 'ALL',
+            ],
+        ];
+
+        return new WP_REST_Response(['presets' => $presets], 200);
     }
     
     public function handle_settings($request) {
