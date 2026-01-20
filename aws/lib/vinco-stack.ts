@@ -452,6 +452,14 @@ export class VincoStack extends cdk.Stack {
       environment: apiCommonEnv,
     });
 
+    const validationClaim = new lambda.Function(this, 'ValidationClaim', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'claim.handler',
+      code: lambda.Code.fromAsset('lambda/api/validation'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
     // Grant permissions
     imagesBucket.grantRead(imagesGet);
     imagesBucket.grantRead(imagesDownload);
@@ -470,6 +478,7 @@ export class VincoStack extends cdk.Stack {
     albumsTable.grantReadWriteData(albumsAddImages);
     imagesTable.grantReadData(albumsAddImages);
     validationQueueTable.grantReadData(validationQueue);
+    validationQueueTable.grantReadWriteData(validationClaim);
     validationQueueTable.grantReadWriteData(validationApprove);
     validationQueueTable.grantReadWriteData(validationReject);
     validationQueueTable.grantReadWriteData(validationReassign);
@@ -515,6 +524,7 @@ export class VincoStack extends cdk.Stack {
     validation.addMethod('GET', new apigateway.LambdaIntegration(validationQueue));
     
     const queueItem = validation.addResource('{queueItemId}');
+    queueItem.addResource('claim').addMethod('POST', new apigateway.LambdaIntegration(validationClaim));
     queueItem.addResource('approve').addMethod('POST', new apigateway.LambdaIntegration(validationApprove));
     queueItem.addResource('reject').addMethod('POST', new apigateway.LambdaIntegration(validationReject));
     queueItem.addResource('reassign').addMethod('POST', new apigateway.LambdaIntegration(validationReassign));

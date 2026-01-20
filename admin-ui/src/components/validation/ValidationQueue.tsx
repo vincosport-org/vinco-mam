@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { validation, athletes } from '../../services/api';
 import { LoadingSpinner, Button, Modal, Input } from '../common';
+import { ValidationItem as ValidationItemComponent } from './ValidationItem';
+import { AthleteComparison as AthleteComparisonComponent } from './AthleteComparison';
 import toast from 'react-hot-toast';
 
 interface ValidationItem {
@@ -140,82 +142,74 @@ export default function ValidationQueue() {
               <p className="text-gray-400 text-sm mt-2">All recognition results have been validated</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {items.map((item) => (
-                <div
-                  key={item.queueItemId}
-                  className="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-lg transition-shadow"
-                  onClick={() => setSelectedItem(item)}
-                >
-                  {item.imageUrl && (
-                    <div className="mb-4 aspect-square rounded-lg overflow-hidden bg-gray-100">
-                      <img
-                        src={item.imageUrl}
-                        alt="Validation item"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
+            <div className="flex gap-6">
+              {/* Queue List */}
+              <div className="w-80 border-r border-gray-200 dark:border-gray-700 overflow-y-auto max-h-[calc(100vh-200px)]">
+                <div className="space-y-0">
+                  {items.map((item) => (
+                    <ValidationItemComponent
+                      key={item.queueItemId}
+                      item={{
+                        queueItemId: item.queueItemId,
+                        imageId: item.imageId,
+                        athleteId: item.suggestedAthlete?.athleteId,
+                        athleteName: item.suggestedAthlete?.athleteName,
+                        confidence: item.suggestedAthlete?.confidence,
+                        imageUrl: item.imageUrl,
+                        status: item.status,
+                      }}
+                      isSelected={selectedItem?.queueItemId === item.queueItemId}
+                      onClick={() => setSelectedItem(item)}
+                    />
+                  ))}
+                </div>
+              </div>
 
-                  <div className="space-y-2">
-                    {item.suggestedAthlete && (
-                      <div>
-                        <p className="text-sm text-gray-500">Suggested Athlete</p>
-                        <p className="font-semibold">{item.suggestedAthlete.athleteName}</p>
-                        <p className="text-xs text-gray-400">
-                          Confidence: {(item.suggestedAthlete.confidence * 100).toFixed(1)}%
-                        </p>
-                      </div>
-                    )}
-
-                    {item.detectedBib && (
-                      <div>
-                        <p className="text-sm text-gray-500">Detected Bib</p>
-                        <p className="font-mono text-sm">{item.detectedBib.text}</p>
-                      </div>
-                    )}
-
-                    <div className="flex gap-2 mt-4">
+              {/* Comparison View */}
+              <div className="flex-1">
+                {selectedItem ? (
+                  <>
+                    <AthleteComparisonComponent
+                      item={{
+                        queueItemId: selectedItem.queueItemId,
+                        imageId: selectedItem.imageId,
+                        imageUrl: selectedItem.imageUrl,
+                        athleteId: selectedItem.suggestedAthlete?.athleteId,
+                        athleteName: selectedItem.suggestedAthlete?.athleteName,
+                        headshotUrl: undefined,
+                        confidence: selectedItem.suggestedAthlete?.confidence,
+                      }}
+                    />
+                    <div className="mt-6 flex justify-center gap-4">
                       <Button
-                        size="sm"
-                        variant="primary"
-                        className="flex-1"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleApprove(item);
-                        }}
-                        disabled={approveMutation.isPending}
+                        variant="danger"
+                        onClick={() => handleReject(selectedItem)}
+                        disabled={rejectMutation.isPending}
                       >
-                        Approve
+                        Reject
                       </Button>
                       <Button
-                        size="sm"
                         variant="secondary"
-                        className="flex-1"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleReassign(item);
-                        }}
+                        onClick={() => handleReassign(selectedItem)}
                         disabled={reassignMutation.isPending}
                       >
                         Reassign
                       </Button>
                       <Button
-                        size="sm"
-                        variant="danger"
-                        className="flex-1"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleReject(item);
-                        }}
-                        disabled={rejectMutation.isPending}
+                        variant="primary"
+                        onClick={() => handleApprove(selectedItem)}
+                        disabled={approveMutation.isPending}
                       >
-                        Reject
+                        Approve
                       </Button>
                     </div>
+                  </>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-gray-500">
+                    Select an item from the queue to view details
                   </div>
-                </div>
-              ))}
+                )}
+              </div>
             </div>
           )}
         </>

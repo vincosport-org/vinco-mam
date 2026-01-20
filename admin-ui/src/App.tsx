@@ -7,6 +7,7 @@ import { useUserStore } from './stores/userStore';
 import { WebSocketProvider } from './context/WebSocketContext';
 import { KeyboardShortcutsProvider } from './context/KeyboardShortcutsContext';
 
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 import Layout from './components/Layout';
 import RouteHandler from './components/RouteHandler';
 import Dashboard from './components/dashboard/Dashboard';
@@ -80,13 +81,14 @@ export default function App() {
   }, []);
   
   return (
-    <QueryClientProvider client={queryClient}>
-      <WebSocketProvider>
-        <KeyboardShortcutsProvider>
-          <BrowserRouter>
-            <Layout>
-              <RouteHandler />
-              <Routes>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <WebSocketProvider>
+          <KeyboardShortcutsProvider>
+            <BrowserRouter>
+              <Layout>
+                <RouteHandler />
+                <Routes>
                 {/* Dashboard */}
                 <Route path="/" element={<Dashboard />} />
                 
@@ -124,5 +126,6 @@ export default function App() {
         </KeyboardShortcutsProvider>
       </WebSocketProvider>
     </QueryClientProvider>
+    </ErrorBoundary>
   );
 }

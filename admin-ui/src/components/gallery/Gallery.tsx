@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { images } from '../../services/api';
-import { ImageThumbnail, LoadingSpinner, Button, Input } from '../common';
-import { Modal } from '../common';
+import { LoadingSpinner, Button, Input } from '../common';
+import { GalleryItem } from './GalleryItem';
+import { ImagePreview } from './ImagePreview';
 
 interface Image {
   imageId: string;
@@ -128,41 +129,26 @@ export default function Gallery() {
               {/* Image Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
                 {imagesList.map((image: Image) => (
-                  <div key={image.imageId} className="relative group">
-                    <ImageThumbnail
-                      src={image.signedUrls?.thumbnail || image.signedUrls?.proxy || ''}
-                      alt={image.filename}
-                      onClick={() => handleImageClick(image)}
-                      className="cursor-pointer"
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-opacity flex items-center justify-center opacity-0 group-hover:opacity-100">
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handlePreviewClick(image);
-                          }}
-                        >
-                          Preview
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={() => handleImageClick(image)}
-                        >
-                          Edit
-                        </Button>
-                      </div>
-                    </div>
-                    {image.recognizedAthletes && image.recognizedAthletes.length > 0 && (
-                      <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
-                        {image.recognizedAthletes.length} athlete{image.recognizedAthletes.length > 1 ? 's' : ''}
-                      </div>
-                    )}
-                  </div>
+                  <GalleryItem
+                    key={image.imageId}
+                    image={image}
+                    onClick={() => handleImageClick(image)}
+                  />
                 ))}
               </div>
+              
+              {/* Preview Modal */}
+              {selectedImage && (
+                <ImagePreview
+                  image={selectedImage}
+                  isOpen={!!selectedImage}
+                  onClose={() => setSelectedImage(null)}
+                  onEdit={() => {
+                    setSelectedImage(null);
+                    handleImageClick(selectedImage);
+                  }}
+                />
+              )}
 
               {/* Pagination */}
               {data?.data?.total && data.data.total > limit && (
@@ -191,61 +177,6 @@ export default function Gallery() {
         </>
       )}
 
-      {/* Preview Modal */}
-      <Modal
-        isOpen={!!selectedImage}
-        onClose={() => setSelectedImage(null)}
-        title={selectedImage?.filename}
-        size="xl"
-      >
-        {selectedImage && (
-          <div>
-            <img
-              src={selectedImage.signedUrls?.proxy || selectedImage.signedUrls?.original || ''}
-              alt={selectedImage.filename}
-              className="w-full h-auto rounded-lg mb-4"
-            />
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <strong>Filename:</strong> {selectedImage.filename}
-              </div>
-              <div>
-                <strong>Uploaded:</strong> {new Date(selectedImage.uploadedAt).toLocaleDateString()}
-              </div>
-              {selectedImage.photographerName && (
-                <div>
-                  <strong>Photographer:</strong> {selectedImage.photographerName}
-                </div>
-              )}
-              {selectedImage.eventName && (
-                <div>
-                  <strong>Event:</strong> {selectedImage.eventName}
-                </div>
-              )}
-            </div>
-            {selectedImage.recognizedAthletes && selectedImage.recognizedAthletes.length > 0 && (
-              <div className="mt-4">
-                <strong>Recognized Athletes:</strong>
-                <ul className="list-disc list-inside mt-2">
-                  {selectedImage.recognizedAthletes.map((athlete, idx) => (
-                    <li key={idx}>
-                      {athlete.athleteName} ({(athlete.confidence * 100).toFixed(1)}%)
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            <div className="mt-6 flex gap-2">
-              <Button onClick={() => handleImageClick(selectedImage)}>
-                Open in Editor
-              </Button>
-              <Button variant="outline" onClick={() => setSelectedImage(null)}>
-                Close
-              </Button>
-            </div>
-          </div>
-        )}
-      </Modal>
     </div>
   );
 }

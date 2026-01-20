@@ -1,7 +1,9 @@
 import { useRef, useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { api } from '../../services/api';
-import { useWebSocket } from '../../hooks/useWebSocket';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useImage, useSaveEdits } from '../../hooks/useImages';
+import { AdjustmentPanel } from './AdjustmentPanel';
+import { LoadingSpinner, Button } from '../common';
+import toast from 'react-hot-toast';
 
 interface EditParameters {
   exposure?: number;
@@ -27,44 +29,41 @@ interface EditParameters {
 
 export default function ImageEditor() {
   const { imageId } = useParams<{ imageId: string }>();
+  const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
-  const [loading, setLoading] = useState(true);
   const [edits, setEdits] = useState<EditParameters>({});
-  const [saving, setSaving] = useState(false);
-  const { send } = useWebSocket();
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  // Load image data
+  const { data: imageData, isLoading } = useImage(imageId);
+  const saveEditsMutation = useSaveEdits();
+
+  // Load image when data is available
   useEffect(() => {
-    if (!imageId) return;
+    if (!imageData?.data?.image || !canvasRef.current) return;
 
-    const loadImage = async () => {
-      try {
-        const response = await api.get(`/images/${imageId}`);
-        
-        // Load image
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = () => {
-          imageRef.current = img;
-          setLoading(false);
-          applyEdits(img, edits);
-        };
-        img.src = response.data.signedUrls?.proxy || response.data.signedUrls?.original;
-      } catch (error) {
-        console.error('Error loading image:', error);
-        setLoading(false);
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      imageRef.current = img;
+      const canvas = canvasRef.current;
+      if (canvas) {
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+      }
+      if (imageData.data.image.currentEdits) {
+        setEdits(imageData.data.image.currentEdits);
+        applyEdits(img, imageData.data.image.currentEdits);
+      } else {
+        applyEdits(img, {});
       }
     };
+    img.src = imageData.data.signedUrls?.proxy || imageData.data.signedUrls?.original || '';
+  }, [imageData]);
 
-    loadImage();
-  }, [imageId]);
-
-
-  // Apply edits using WebGL shaders
+  // Apply edits when they change
   useEffect(() => {
     if (!imageRef.current || !canvasRef.current) return;
-
     applyEdits(imageRef.current, edits);
   }, [edits]);
 
@@ -105,34 +104,45 @@ export default function ImageEditor() {
   };
 
   const handleEditChange = (key: keyof EditParameters, value: number) => {
-    setEdits(prev => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
-
-  const handleSaveEdits = async () => {
-    if (!imageId) return;
-
-    setSaving(true);
-    try {
-      await api.post(`/images/${imageId}/edits`, { edits });
-      send({ action: 'imageUpdated', imageId });
-    } catch (error) {
-      console.error('Error saving edits:', error);
-    } finally {
-      setSaving(false);
-    }
+    setEdits((prev) => {
+      const newEdits = { ...prev, [key]: value };
+      setHasUnsavedChanges(true);
+      if (imageRef.current) {
+        applyEdits(imageRef.current, newEdits);
+      }
+      return newEdits;
+    });
   };
 
   const handleReset = () => {
     setEdits({});
+    setHasUnsavedChanges(true);
+    if (imageRef.current) {
+      applyEdits(imageRef.current, {});
+    }
   };
 
-  if (loading) {
+  const handleSave = () => {
+    if (!imageId) return;
+    saveEditsMutation.mutate({ imageId, edits }, {
+      onSuccess: () => {
+        setHasUnsavedChanges(false);
+      },
+    });
+  };
+
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="text-lg">Loading image...</div>
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  if (!imageData?.data?.image) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-lg text-gray-500">Image not found</div>
       </div>
     );
   }
@@ -141,139 +151,45 @@ export default function ImageEditor() {
     <div className="flex h-screen bg-gray-900 text-white">
       {/* Main canvas area */}
       <div className="flex-1 flex flex-col">
-        <div className="flex-1 flex items-center justify-center p-4 bg-black">
+        <div className="flex-1 flex items-center justify-center p-4 bg-black relative">
           <canvas
             ref={canvasRef}
-            className="max-w-full max-h-full"
-            style={{ maxHeight: 'calc(100vh - 200px)' }}
+            className="max-w-full max-h-full object-contain"
+            style={{ maxHeight: 'calc(100vh - 120px)' }}
           />
+          {hasUnsavedChanges && (
+            <div className="absolute top-4 left-4 bg-yellow-500 text-black px-3 py-1 rounded text-sm font-medium">
+              Unsaved changes
+            </div>
+          )}
         </div>
       </div>
 
       {/* Edit controls panel */}
-      <div className="w-80 bg-gray-800 p-4 overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4">Edit Controls</h2>
-
-        {/* Exposure */}
-        <div className="mb-4">
-          <label className="block mb-2">
-            Exposure: {edits.exposure || 0}
-          </label>
-          <input
-            type="range"
-            min="-100"
-            max="100"
-            value={edits.exposure || 0}
-            onChange={(e) => handleEditChange('exposure', parseInt(e.target.value))}
-            className="w-full"
-          />
-        </div>
-
-        {/* Contrast */}
-        <div className="mb-4">
-          <label className="block mb-2">
-            Contrast: {edits.contrast || 0}
-          </label>
-          <input
-            type="range"
-            min="-100"
-            max="100"
-            value={edits.contrast || 0}
-            onChange={(e) => handleEditChange('contrast', parseInt(e.target.value))}
-            className="w-full"
-          />
-        </div>
-
-        {/* Saturation */}
-        <div className="mb-4">
-          <label className="block mb-2">
-            Saturation: {edits.saturation || 0}
-          </label>
-          <input
-            type="range"
-            min="-100"
-            max="100"
-            value={edits.saturation || 0}
-            onChange={(e) => handleEditChange('saturation', parseInt(e.target.value))}
-            className="w-full"
-          />
-        </div>
-
-        {/* Highlights */}
-        <div className="mb-4">
-          <label className="block mb-2">
-            Highlights: {edits.highlights || 0}
-          </label>
-          <input
-            type="range"
-            min="-100"
-            max="100"
-            value={edits.highlights || 0}
-            onChange={(e) => handleEditChange('highlights', parseInt(e.target.value))}
-            className="w-full"
-          />
-        </div>
-
-        {/* Shadows */}
-        <div className="mb-4">
-          <label className="block mb-2">
-            Shadows: {edits.shadows || 0}
-          </label>
-          <input
-            type="range"
-            min="-100"
-            max="100"
-            value={edits.shadows || 0}
-            onChange={(e) => handleEditChange('shadows', parseInt(e.target.value))}
-            className="w-full"
-          />
-        </div>
-
-        {/* Temperature */}
-        <div className="mb-4">
-          <label className="block mb-2">
-            Temperature: {edits.temperature || 0}
-          </label>
-          <input
-            type="range"
-            min="-100"
-            max="100"
-            value={edits.temperature || 0}
-            onChange={(e) => handleEditChange('temperature', parseInt(e.target.value))}
-            className="w-full"
-          />
-        </div>
-
-        {/* Tint */}
-        <div className="mb-4">
-          <label className="block mb-2">
-            Tint: {edits.tint || 0}
-          </label>
-          <input
-            type="range"
-            min="-100"
-            max="100"
-            value={edits.tint || 0}
-            onChange={(e) => handleEditChange('tint', parseInt(e.target.value))}
-            className="w-full"
-          />
-        </div>
-
-        {/* Action buttons */}
-        <div className="flex gap-2 mt-6">
-          <button
-            onClick={handleReset}
-            className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded"
+      <div className="w-80 bg-gray-800 overflow-y-auto">
+        <div className="p-4 border-b border-gray-700 flex items-center justify-between">
+          <h2 className="text-xl font-bold text-white">Edit Controls</h2>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate(-1)}
           >
-            Reset
-          </button>
-          <button
-            onClick={handleSaveEdits}
-            disabled={saving}
-            className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded disabled:opacity-50"
+            Close
+          </Button>
+        </div>
+        <AdjustmentPanel
+          edits={edits}
+          onChange={handleEditChange}
+          onReset={handleReset}
+        />
+        <div className="p-4 border-t border-gray-700">
+          <Button
+            onClick={handleSave}
+            disabled={!hasUnsavedChanges || saveEditsMutation.isPending}
+            className="w-full"
           >
-            {saving ? 'Saving...' : 'Save Edits'}
-          </button>
+            {saveEditsMutation.isPending ? 'Saving...' : hasUnsavedChanges ? 'Save Changes (⌘S)' : 'Saved'}
+          </Button>
         </div>
       </div>
     </div>
