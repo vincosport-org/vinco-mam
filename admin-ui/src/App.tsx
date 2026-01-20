@@ -85,6 +85,7 @@ export default function App() {
         <KeyboardShortcutsProvider>
           <BrowserRouter>
             <Layout>
+              <RouteHandler />
               <Routes>
                 {/* Dashboard */}
                 <Route path="/" element={<Dashboard />} />
