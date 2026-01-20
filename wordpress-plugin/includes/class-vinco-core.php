@@ -15,6 +15,7 @@ class Vinco_MAM_Core {
         $this->load_dependencies();
         $this->define_admin_hooks();
         $this->define_api_hooks();
+        $this->define_shortcode_hooks();
         $this->define_database_hooks();
     }
     
@@ -24,6 +25,7 @@ class Vinco_MAM_Core {
         require_once VINCO_MAM_PLUGIN_DIR . 'includes/class-vinco-auth.php';
         require_once VINCO_MAM_PLUGIN_DIR . 'includes/class-vinco-database.php';
         require_once VINCO_MAM_PLUGIN_DIR . 'includes/class-vinco-webhooks.php';
+        require_once VINCO_MAM_PLUGIN_DIR . 'includes/class-vinco-shortcodes.php';
         require_once VINCO_MAM_PLUGIN_DIR . 'admin/class-vinco-admin.php';
         require_once VINCO_MAM_PLUGIN_DIR . 'includes/class-vinco-roles.php';
     }
@@ -40,6 +42,10 @@ class Vinco_MAM_Core {
         $webhooks = new Vinco_MAM_Webhooks();
         
         add_action('rest_api_init', [$api, 'register_routes']);
+    }
+    
+    private function define_shortcode_hooks() {
+        $shortcodes = new Vinco_MAM_Shortcodes();
     }
     
     private function define_database_hooks() {

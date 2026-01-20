@@ -30,11 +30,10 @@ export default function ImageEditor() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
   const [loading, setLoading] = useState(true);
-  const [imageData, setImageData] = useState<any>(null);
   const [edits, setEdits] = useState<EditParameters>({});
   const [saving, setSaving] = useState(false);
   const [glContext, setGlContext] = useState<WebGLRenderingContext | null>(null);
-  const { sendMessage } = useWebSocket();
+  const { send } = useWebSocket();
 
   // Load image data
   useEffect(() => {
@@ -43,7 +42,6 @@ export default function ImageEditor() {
     const loadImage = async () => {
       try {
         const response = await api.get(`/images/${imageId}`);
-        setImageData(response.data);
         
         // Load image
         const img = new Image();
@@ -68,7 +66,7 @@ export default function ImageEditor() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl') as WebGLRenderingContext | null;
     if (!gl) {
       console.error('WebGL not supported');
       return;
@@ -80,84 +78,24 @@ export default function ImageEditor() {
       canvas.height = imageRef.current.height;
     }
 
-    setGlContext(gl);
+    setGlContext(gl as WebGLRenderingContext);
   }, []);
 
   // Apply edits using WebGL shaders
   useEffect(() => {
-    if (!glContext || !imageRef.current || !canvasRef.current) return;
+    if (!imageRef.current || !canvasRef.current) return;
 
-    applyEdits(glContext, imageRef.current, edits);
-  }, [glContext, edits]);
+    applyEdits(imageRef.current, edits);
+  }, [edits]);
 
-  const applyEdits = (gl: WebGLRenderingContext, image: HTMLImageElement, editParams: EditParameters) => {
-    // WebGL shader code for image processing
-    const vertexShaderSource = `
-      attribute vec2 a_position;
-      attribute vec2 a_texCoord;
-      varying vec2 v_texCoord;
-      void main() {
-        gl_Position = vec4(a_position, 0.0, 1.0);
-        v_texCoord = a_texCoord;
-      }
-    `;
-
-    const fragmentShaderSource = `
-      precision mediump float;
-      uniform sampler2D u_image;
-      uniform float u_exposure;
-      uniform float u_contrast;
-      uniform float u_saturation;
-      uniform float u_highlights;
-      uniform float u_shadows;
-      uniform float u_whites;
-      uniform float u_blacks;
-      uniform float u_temperature;
-      uniform float u_tint;
-      uniform float u_vibrance;
-      uniform float u_clarity;
-      uniform float u_sharpness;
-      varying vec2 v_texCoord;
-
-      void main() {
-        vec4 color = texture2D(u_image, v_texCoord);
-        
-        // Exposure
-        color.rgb *= pow(2.0, u_exposure / 100.0);
-        
-        // Contrast
-        color.rgb = ((color.rgb - 0.5) * (1.0 + u_contrast / 100.0)) + 0.5;
-        
-        // Saturation
-        float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
-        color.rgb = mix(vec3(gray), color.rgb, 1.0 + u_saturation / 100.0);
-        
-        // Highlights/Shadows
-        float luminance = dot(color.rgb, vec3(0.299, 0.587, 0.114));
-        float highlightFactor = smoothstep(0.5, 1.0, luminance);
-        float shadowFactor = smoothstep(0.0, 0.5, luminance);
-        color.rgb += highlightFactor * u_highlights / 100.0;
-        color.rgb += shadowFactor * u_shadows / 100.0;
-        
-        // Temperature (adjust color balance)
-        color.r *= 1.0 + u_temperature / 200.0;
-        color.b *= 1.0 - u_temperature / 200.0;
-        
-        // Tint
-        color.r += u_tint / 200.0;
-        color.b -= u_tint / 200.0;
-        
-        gl_FragColor = color;
-      }
-    `;
-
-    // Compile shaders (simplified - would need proper shader compilation)
-    // For now, use 2D canvas as fallback
+  const applyEdits = (image: HTMLImageElement, editParams: EditParameters) => {
+    // Use 2D canvas for image editing (WebGL implementation would require proper shader compilation)
     const ctx = canvasRef.current?.getContext('2d');
     if (ctx && image) {
       ctx.drawImage(image, 0, 0);
       
       // Apply basic edits using canvas filters (simpler approach)
+      if (!canvasRef.current) return;
       const imageData = ctx.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height);
       const data = imageData.data;
 
@@ -199,7 +137,7 @@ export default function ImageEditor() {
     setSaving(true);
     try {
       await api.post(`/images/${imageId}/edits`, { edits });
-      sendMessage({ action: 'imageUpdated', imageId });
+      send({ action: 'imageUpdated', imageId });
     } catch (error) {
       console.error('Error saving edits:', error);
     } finally {
