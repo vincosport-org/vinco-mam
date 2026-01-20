@@ -2,14 +2,14 @@
 /**
  * Plugin Name: Vinco Media Asset Management
  * Description: Sports media asset management with AI-powered athlete recognition
- * Version: 1.4.0
+ * Version: 1.4.2
  * Requires PHP: 8.0
  * Author: Vinco Sport
  */
 
 defined('ABSPATH') || exit;
 
-define('VINCO_MAM_VERSION', '1.4.0');
+define('VINCO_MAM_VERSION', '1.4.2');
 define('VINCO_MAM_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('VINCO_MAM_PLUGIN_URL', plugin_dir_url(__FILE__));
 

@@ -21,13 +21,12 @@ class Vinco_MAM_Config {
     // AWS Region - must match CDK deployment region
     const AWS_REGION = 'eu-west-1';
 
-    // API Gateway REST endpoint - populated after CDK deployment
-    // Format: https://{api-id}.execute-api.{region}.amazonaws.com/prod
-    const API_ENDPOINT = 'https://vinco-api.execute-api.eu-west-1.amazonaws.com/prod';
+    // API Gateway REST endpoint - from VincoStack CDK deployment
+    const API_ENDPOINT = 'https://o7s6ycao96.execute-api.eu-west-1.amazonaws.com/prod';
 
-    // WebSocket endpoint for real-time updates - populated after CDK deployment
-    // Format: wss://{api-id}.execute-api.{region}.amazonaws.com/prod
-    const WEBSOCKET_ENDPOINT = 'wss://vinco-ws.execute-api.eu-west-1.amazonaws.com/prod';
+    // WebSocket endpoint for real-time updates - from VincoStack CDK deployment
+    // Note: WebSocket API exists but stage not yet deployed
+    const WEBSOCKET_ENDPOINT = 'wss://fh4kprq4vf.execute-api.eu-west-1.amazonaws.com/prod';
 
     // S3 Bucket names (must match CDK stack)
     const S3_UPLOADS_BUCKET = 'vinco-uploads';
@@ -61,7 +60,7 @@ class Vinco_MAM_Config {
     /**
      * Plugin defaults
      */
-    const PLUGIN_VERSION = '1.4.0';
+    const PLUGIN_VERSION = '1.4.2';
 
     /**
      * JWT Secret for authentication between WordPress and AWS
