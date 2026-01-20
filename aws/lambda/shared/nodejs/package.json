@@ -1,0 +1,7 @@
+{
+  "name": "vinco-shared",
+  "version": "1.0.0",
+  "description": "Shared utilities for Vinco MAM Lambda functions",
+  "main": "index.js",
+  "dependencies": {}
+}
