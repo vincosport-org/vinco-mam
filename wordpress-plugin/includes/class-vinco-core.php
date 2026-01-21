@@ -13,10 +13,25 @@ class Vinco_MAM_Core {
 
     private function __construct() {
         $this->load_dependencies();
+        $this->maybe_update_capabilities();
         $this->define_admin_hooks();
         $this->define_api_hooks();
         $this->define_shortcode_hooks();
         $this->define_database_hooks();
+    }
+
+    /**
+     * Update capabilities if plugin version has changed
+     */
+    private function maybe_update_capabilities() {
+        $stored_version = get_option('vinco_mam_version', '0');
+        $current_version = defined('VINCO_MAM_VERSION') ? VINCO_MAM_VERSION : Vinco_MAM_Config::PLUGIN_VERSION;
+
+        if (version_compare($stored_version, $current_version, '<')) {
+            // Re-create roles and capabilities
+            Vinco_MAM_Roles::create_roles();
+            update_option('vinco_mam_version', $current_version);
+        }
     }
 
     private function load_dependencies() {
@@ -48,6 +63,39 @@ class Vinco_MAM_Core {
 
     private function define_shortcode_hooks() {
         $shortcodes = new Vinco_MAM_Shortcodes();
+
+        // Enqueue scripts on dynamic Vinco pages
+        add_action('wp_enqueue_scripts', [$this, 'maybe_enqueue_frontend_scripts']);
+    }
+
+    /**
+     * Enqueue frontend scripts on Vinco dynamic pages
+     */
+    public function maybe_enqueue_frontend_scripts() {
+        // Check if this is a Vinco dynamic page
+        if (!is_page()) return;
+
+        $page_id = get_the_ID();
+        $is_vinco_page = get_post_meta($page_id, '_vinco_mam_page', true);
+        $is_dynamic = in_array(get_post_meta($page_id, '_vinco_page_type', true), [
+            'vinco-photo', 'vinco-athlete', 'vinco-event', 'vinco-album', 'vinco-tag'
+        ]);
+
+        if ($is_vinco_page && $is_dynamic) {
+            wp_enqueue_style('vinco-mam-frontend', VINCO_MAM_PLUGIN_URL . 'assets/frontend/style.css', [], VINCO_MAM_VERSION);
+            wp_enqueue_script('vinco-mam-frontend', VINCO_MAM_PLUGIN_URL . 'assets/frontend/gallery.js', ['jquery'], VINCO_MAM_VERSION, true);
+
+            $localize_data = [
+                'apiRoot' => esc_url_raw(rest_url('vinco-mam/v1/')),
+                'pages' => Vinco_MAM_Pages::get_all_page_urls(),
+            ];
+
+            if (is_user_logged_in()) {
+                $localize_data['nonce'] = wp_create_nonce('wp_rest');
+            }
+
+            wp_localize_script('vinco-mam-frontend', 'vincoMAMFrontend', $localize_data);
+        }
     }
 
     private function define_database_hooks() {

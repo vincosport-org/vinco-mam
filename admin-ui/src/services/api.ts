@@ -22,6 +22,9 @@ export const images = {
   export: (imageId: string, settings: any) => api.post(`images/${imageId}/export`, settings),
   download: (imageId: string) => api.get(`images/${imageId}/download/original`),
   getExportPresets: () => api.get('export-presets'),
+  // Upload: get presigned URLs for direct S3 upload
+  getUploadUrls: (files: Array<{ filename: string; contentType?: string }>, folderPath?: string) =>
+    api.post('images/upload', { files, folderPath }),
 };
 
 // Albums API

@@ -60,7 +60,7 @@ class Vinco_MAM_Config {
     /**
      * Plugin defaults
      */
-    const PLUGIN_VERSION = '1.4.2';
+    const PLUGIN_VERSION = '1.5.5';
 
     /**
      * JWT Secret for authentication between WordPress and AWS

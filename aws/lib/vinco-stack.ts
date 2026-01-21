@@ -136,16 +136,202 @@ export class VincoStack extends cdk.Stack {
       partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
     });
 
+    // Albums table (legacy - kept for backwards compatibility)
     const albumsTable = new dynamodb.Table(this, 'AlbumsTable', {
       tableName: 'vinco-albums',
       partitionKey: { name: 'albumId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
     });
 
+    // Tags Table - Hierarchical taxonomy system
+    const tagsTable = new dynamodb.Table(this, 'TagsTable', {
+      tableName: 'vinco-tags',
+      partitionKey: { name: 'tagId', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+    });
+
+    // GSI for querying by parent (to build tree structure)
+    tagsTable.addGlobalSecondaryIndex({
+      indexName: 'parent-index',
+      partitionKey: { name: 'parentTagId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'sortOrder', type: dynamodb.AttributeType.NUMBER },
+    });
+
+    // GSI for querying root-level tags (parentTagId = 'ROOT')
+    tagsTable.addGlobalSecondaryIndex({
+      indexName: 'type-index',
+      partitionKey: { name: 'tagType', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'name', type: dynamodb.AttributeType.STRING },
+    });
+
+    // Tagging Rules Table - Auto-assignment rules
+    const taggingRulesTable = new dynamodb.Table(this, 'TaggingRulesTable', {
+      tableName: 'vinco-tagging-rules',
+      partitionKey: { name: 'ruleId', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+    });
+
+    // GSI for querying active rules by date range
+    taggingRulesTable.addGlobalSecondaryIndex({
+      indexName: 'active-rules-index',
+      partitionKey: { name: 'isActive', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'startDate', type: dynamodb.AttributeType.STRING },
+    });
+
+    // GSI for querying rules by photographer folder
+    taggingRulesTable.addGlobalSecondaryIndex({
+      indexName: 'folder-index',
+      partitionKey: { name: 'folderPath', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'startDate', type: dynamodb.AttributeType.STRING },
+    });
+
     const exportPresetsTable = new dynamodb.Table(this, 'ExportPresetsTable', {
       tableName: 'vinco-export-presets',
       partitionKey: { name: 'presetId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+    });
+
+    // ==========================================
+    // NEW TABLES - Migrated from WordPress MySQL
+    // ==========================================
+
+    // Athletes Table
+    const athletesTable = new dynamodb.Table(this, 'AthletesTable', {
+      tableName: 'vinco-athletes',
+      partitionKey: { name: 'athleteId', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+    });
+
+    athletesTable.addGlobalSecondaryIndex({
+      indexName: 'name-index',
+      partitionKey: { name: 'lastNameFirstChar', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'lastNameFirstName', type: dynamodb.AttributeType.STRING },
+    });
+
+    athletesTable.addGlobalSecondaryIndex({
+      indexName: 'nationality-index',
+      partitionKey: { name: 'nationality', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'lastNameFirstName', type: dynamodb.AttributeType.STRING },
+    });
+
+    // Events Table
+    const eventsTable = new dynamodb.Table(this, 'EventsTable', {
+      tableName: 'vinco-events',
+      partitionKey: { name: 'eventId', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+    });
+
+    eventsTable.addGlobalSecondaryIndex({
+      indexName: 'date-index',
+      partitionKey: { name: 'yearMonth', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'startDate', type: dynamodb.AttributeType.STRING },
+    });
+
+    eventsTable.addGlobalSecondaryIndex({
+      indexName: 'venue-index',
+      partitionKey: { name: 'venueId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'startDate', type: dynamodb.AttributeType.STRING },
+    });
+
+    // Event Schedules Table
+    const eventSchedulesTable = new dynamodb.Table(this, 'EventSchedulesTable', {
+      tableName: 'vinco-event-schedules',
+      partitionKey: { name: 'eventId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'scheduleId', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+    });
+
+    eventSchedulesTable.addGlobalSecondaryIndex({
+      indexName: 'time-index',
+      partitionKey: { name: 'scheduleDate', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'scheduledTime', type: dynamodb.AttributeType.STRING },
+    });
+
+    // Start Lists Table
+    const startListsTable = new dynamodb.Table(this, 'StartListsTable', {
+      tableName: 'vinco-start-lists',
+      partitionKey: { name: 'scheduleId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'startListId', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+    });
+
+    startListsTable.addGlobalSecondaryIndex({
+      indexName: 'athlete-index',
+      partitionKey: { name: 'athleteId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'scheduleId', type: dynamodb.AttributeType.STRING },
+    });
+
+    // Results Table
+    const resultsTable = new dynamodb.Table(this, 'ResultsTable', {
+      tableName: 'vinco-results',
+      partitionKey: { name: 'scheduleId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'resultId', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+    });
+
+    resultsTable.addGlobalSecondaryIndex({
+      indexName: 'athlete-results-index',
+      partitionKey: { name: 'athleteId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'finishTime', type: dynamodb.AttributeType.STRING },
+    });
+
+    // Venues Table
+    const venuesTable = new dynamodb.Table(this, 'VenuesTable', {
+      tableName: 'vinco-venues',
+      partitionKey: { name: 'venueId', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+    });
+
+    venuesTable.addGlobalSecondaryIndex({
+      indexName: 'country-index',
+      partitionKey: { name: 'country', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'name', type: dynamodb.AttributeType.STRING },
+    });
+
+    // Photographers Table
+    const photographersTable = new dynamodb.Table(this, 'PhotographersTable', {
+      tableName: 'vinco-photographers',
+      partitionKey: { name: 'photographerId', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+    });
+
+    photographersTable.addGlobalSecondaryIndex({
+      indexName: 'wpUserId-index',
+      partitionKey: { name: 'wpUserId', type: dynamodb.AttributeType.NUMBER },
+    });
+
+    photographersTable.addGlobalSecondaryIndex({
+      indexName: 'ftpUsername-index',
+      partitionKey: { name: 'ftpUsername', type: dynamodb.AttributeType.STRING },
+    });
+
+    // Image Notes Table
+    const imageNotesTable = new dynamodb.Table(this, 'ImageNotesTable', {
+      tableName: 'vinco-image-notes',
+      partitionKey: { name: 'imageId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'noteId', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+    });
+
+    imageNotesTable.addGlobalSecondaryIndex({
+      indexName: 'user-notes-index',
+      partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'createdAt', type: dynamodb.AttributeType.STRING },
+    });
+
+    // Activity Log Table (with TTL for auto-expiry)
+    const activityLogTable = new dynamodb.Table(this, 'ActivityLogTable', {
+      tableName: 'vinco-activity-log',
+      partitionKey: { name: 'entityKey', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'timestamp', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      timeToLiveAttribute: 'ttl',
+    });
+
+    activityLogTable.addGlobalSecondaryIndex({
+      indexName: 'user-activity-index',
+      partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'timestamp', type: dynamodb.AttributeType.STRING },
     });
 
     // SQS Queues
@@ -189,14 +375,8 @@ export class VincoStack extends cdk.Stack {
     uploadsBucket.grantRead(ftpWatcher);
     aiProcessingQueue.grantSendMessages(ftpWatcher);
 
-    // Trigger FTP watcher on S3 uploads (for FileMage sync)
-    // Note: This watches the photographers/ prefix by default
-    // Additional folders can be configured via FILEMAGE_WATCH_FOLDERS env var
-    uploadsBucket.addEventNotification(
-      s3.EventType.OBJECT_CREATED,
-      new s3n.LambdaDestination(ftpWatcher),
-      { prefix: 'photographers/' } // Watch photographers folder by default
-    );
+    // Note: FTP watcher is triggered via EventBridge scheduler or FileMage webhooks,
+    // not via S3 events (to avoid conflicts with the Image Processor)
 
     // Image Processor Lambda
     const imageProcessor = new lambda.Function(this, 'ImageProcessor', {
@@ -211,6 +391,8 @@ export class VincoStack extends cdk.Stack {
         IMAGES_TABLE: imagesTable.tableName,
         AI_QUEUE_URL: aiProcessingQueue.queueUrl,
         RAW_QUEUE_URL: rawProcessingQueue.queueUrl,
+        TAGGING_RULES_TABLE: taggingRulesTable.tableName,
+        TAGS_TABLE: tagsTable.tableName,
       },
     });
 
@@ -219,6 +401,8 @@ export class VincoStack extends cdk.Stack {
     imagesTable.grantReadWriteData(imageProcessor);
     aiProcessingQueue.grantSendMessages(imageProcessor);
     rawProcessingQueue.grantSendMessages(imageProcessor);
+    taggingRulesTable.grantReadData(imageProcessor);
+    tagsTable.grantReadWriteData(imageProcessor);
 
     // S3 trigger
     uploadsBucket.addEventNotification(
@@ -265,6 +449,8 @@ export class VincoStack extends cdk.Stack {
         CONNECTIONS_TABLE: connectionsTable.tableName,
         REKOGNITION_COLLECTION_ID: 'vinco-athletes',
         PLATFORM_STORAGE_BUCKET: platformStorageBucket.bucketName,
+        ATHLETES_TABLE: athletesTable.tableName,
+        START_LISTS_TABLE: startListsTable.tableName,
       },
     });
 
@@ -273,6 +459,8 @@ export class VincoStack extends cdk.Stack {
     imagesTable.grantReadWriteData(aiRecognition);
     validationQueueTable.grantReadWriteData(aiRecognition);
     connectionsTable.grantReadData(aiRecognition);
+    athletesTable.grantReadData(aiRecognition);
+    startListsTable.grantReadData(aiRecognition);
 
     // Grant Rekognition permissions
     aiRecognition.addToRolePolicy(new iam.PolicyStatement({
@@ -319,6 +507,18 @@ export class VincoStack extends cdk.Stack {
       VALIDATION_TABLE: validationQueueTable.tableName,
       EXPORT_PRESETS_TABLE: exportPresetsTable.tableName,
       EXPORT_QUEUE_URL: exportQueue.queueUrl,
+      // New tables - migrated from WordPress
+      ATHLETES_TABLE: athletesTable.tableName,
+      EVENTS_TABLE: eventsTable.tableName,
+      EVENT_SCHEDULES_TABLE: eventSchedulesTable.tableName,
+      START_LISTS_TABLE: startListsTable.tableName,
+      RESULTS_TABLE: resultsTable.tableName,
+      VENUES_TABLE: venuesTable.tableName,
+      PHOTOGRAPHERS_TABLE: photographersTable.tableName,
+      IMAGE_NOTES_TABLE: imageNotesTable.tableName,
+      TAGS_TABLE: tagsTable.tableName,
+      TAGGING_RULES_TABLE: taggingRulesTable.tableName,
+      ACTIVITY_LOG_TABLE: activityLogTable.tableName,
     };
 
     // Images API
@@ -386,6 +586,20 @@ export class VincoStack extends cdk.Stack {
       environment: apiCommonEnv,
     });
 
+    const imagesUpload = new lambda.Function(this, 'ImagesUpload', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'upload.handler',
+      code: lambda.Code.fromAsset('lambda/api/images'),
+      layers: [sharedLayer],
+      environment: {
+        ...apiCommonEnv,
+        UPLOADS_BUCKET: uploadsBucket.bucketName,
+      },
+    });
+
+    // Grant S3 permissions to upload function
+    uploadsBucket.grantPut(imagesUpload);
+
     // Albums API
     const albumsList = new lambda.Function(this, 'AlbumsList', {
       runtime: lambda.Runtime.NODEJS_20_X,
@@ -414,6 +628,14 @@ export class VincoStack extends cdk.Stack {
     const albumsAddImages = new lambda.Function(this, 'AlbumsAddImages', {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: 'addImages.handler',
+      code: lambda.Code.fromAsset('lambda/api/albums'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
+    const albumsGet = new lambda.Function(this, 'AlbumsGet', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'get.handler',
       code: lambda.Code.fromAsset('lambda/api/albums'),
       layers: [sharedLayer],
       environment: apiCommonEnv,
@@ -476,6 +698,7 @@ export class VincoStack extends cdk.Stack {
     albumsTable.grantReadWriteData(albumsCreate);
     albumsTable.grantReadWriteData(albumsUpdate);
     albumsTable.grantReadWriteData(albumsAddImages);
+    albumsTable.grantReadData(albumsGet);
     imagesTable.grantReadData(albumsAddImages);
     validationQueueTable.grantReadData(validationQueue);
     validationQueueTable.grantReadWriteData(validationClaim);
@@ -485,6 +708,10 @@ export class VincoStack extends cdk.Stack {
     imagesTable.grantReadWriteData(validationApprove);
     imagesTable.grantReadWriteData(validationReject);
     exportQueue.grantSendMessages(imagesExport);
+
+    // Image notes permissions
+    imageNotesTable.grantReadWriteData(imagesUpdate);
+    imageNotesTable.grantReadWriteData(imagesGet);
 
     // REST API
     const api = new apigateway.RestApi(this, 'VincoApi', {
@@ -505,19 +732,132 @@ export class VincoStack extends cdk.Stack {
     image.addMethod('PUT', new apigateway.LambdaIntegration(imagesUpdate));
     
     image.addResource('edits').addMethod('POST', new apigateway.LambdaIntegration(imagesSaveEdits));
-    image.addResource('versions').addMethod('GET', new apigateway.LambdaIntegration(imagesVersions));
-    image.addResource('versions').addResource('{versionTimestamp}').addMethod('POST', new apigateway.LambdaIntegration(imagesRevert));
+    const imageVersions = image.addResource('versions');
+    imageVersions.addMethod('GET', new apigateway.LambdaIntegration(imagesVersions));
+    imageVersions.addResource('{versionTimestamp}').addMethod('POST', new apigateway.LambdaIntegration(imagesRevert));
     image.addResource('export').addMethod('POST', new apigateway.LambdaIntegration(imagesExport));
     image.addResource('download').addResource('{type}').addMethod('GET', new apigateway.LambdaIntegration(imagesDownload));
 
-    // Albums API Routes
+    // Upload endpoint for browser uploads
+    images.addResource('upload').addMethod('POST', new apigateway.LambdaIntegration(imagesUpload));
+
+    // Albums API Routes (legacy)
     const albums = api.root.addResource('albums');
     albums.addMethod('GET', new apigateway.LambdaIntegration(albumsList));
     albums.addMethod('POST', new apigateway.LambdaIntegration(albumsCreate));
-    
+
     const album = albums.addResource('{albumId}');
+    album.addMethod('GET', new apigateway.LambdaIntegration(albumsGet));
     album.addMethod('PUT', new apigateway.LambdaIntegration(albumsUpdate));
     album.addResource('images').addMethod('POST', new apigateway.LambdaIntegration(albumsAddImages));
+
+    // Tags API Lambda Functions
+    const tagsList = new lambda.Function(this, 'TagsList', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'list.handler',
+      code: lambda.Code.fromAsset('lambda/api/tags'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
+    const tagsCreate = new lambda.Function(this, 'TagsCreate', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'create.handler',
+      code: lambda.Code.fromAsset('lambda/api/tags'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
+    const tagsUpdate = new lambda.Function(this, 'TagsUpdate', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'update.handler',
+      code: lambda.Code.fromAsset('lambda/api/tags'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
+    const tagsDelete = new lambda.Function(this, 'TagsDelete', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'delete.handler',
+      code: lambda.Code.fromAsset('lambda/api/tags'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
+    const tagsTree = new lambda.Function(this, 'TagsTree', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'tree.handler',
+      code: lambda.Code.fromAsset('lambda/api/tags'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
+    // Tags table permissions
+    tagsTable.grantReadData(tagsList);
+    tagsTable.grantReadData(tagsTree);
+    tagsTable.grantReadWriteData(tagsCreate);
+    tagsTable.grantReadWriteData(tagsUpdate);
+    tagsTable.grantReadWriteData(tagsDelete);
+    imagesTable.grantReadWriteData(tagsUpdate); // For updating image tags
+
+    // Tags API Routes
+    const tags = api.root.addResource('tags');
+    tags.addMethod('GET', new apigateway.LambdaIntegration(tagsList));
+    tags.addMethod('POST', new apigateway.LambdaIntegration(tagsCreate));
+    tags.addResource('tree').addMethod('GET', new apigateway.LambdaIntegration(tagsTree));
+
+    const tag = tags.addResource('{tagId}');
+    tag.addMethod('PUT', new apigateway.LambdaIntegration(tagsUpdate));
+    tag.addMethod('DELETE', new apigateway.LambdaIntegration(tagsDelete));
+
+    // Tagging Rules API Lambda Functions
+    const taggingRulesList = new lambda.Function(this, 'TaggingRulesList', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'list.handler',
+      code: lambda.Code.fromAsset('lambda/api/tagging-rules'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
+    const taggingRulesCreate = new lambda.Function(this, 'TaggingRulesCreate', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'create.handler',
+      code: lambda.Code.fromAsset('lambda/api/tagging-rules'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
+    const taggingRulesUpdate = new lambda.Function(this, 'TaggingRulesUpdate', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'update.handler',
+      code: lambda.Code.fromAsset('lambda/api/tagging-rules'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
+    const taggingRulesDelete = new lambda.Function(this, 'TaggingRulesDelete', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'delete.handler',
+      code: lambda.Code.fromAsset('lambda/api/tagging-rules'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
+    // Tagging rules table permissions
+    taggingRulesTable.grantReadData(taggingRulesList);
+    taggingRulesTable.grantReadWriteData(taggingRulesCreate);
+    taggingRulesTable.grantReadWriteData(taggingRulesUpdate);
+    taggingRulesTable.grantReadWriteData(taggingRulesDelete);
+    tagsTable.grantReadData(taggingRulesCreate); // To validate tag IDs
+
+    // Tagging Rules API Routes
+    const taggingRules = api.root.addResource('tagging-rules');
+    taggingRules.addMethod('GET', new apigateway.LambdaIntegration(taggingRulesList));
+    taggingRules.addMethod('POST', new apigateway.LambdaIntegration(taggingRulesCreate));
+
+    const taggingRule = taggingRules.addResource('{ruleId}');
+    taggingRule.addMethod('PUT', new apigateway.LambdaIntegration(taggingRulesUpdate));
+    taggingRule.addMethod('DELETE', new apigateway.LambdaIntegration(taggingRulesDelete));
 
     // Validation API Routes
     const validation = api.root.addResource('validation');
@@ -564,7 +904,22 @@ export class VincoStack extends cdk.Stack {
 
     imagesBucket.grantReadWrite(athletesUploadHeadshot);
 
-    // Events API (proxies to WordPress)
+    // Athletes table permissions
+    athletesTable.grantReadData(athletesList);
+    athletesTable.grantReadWriteData(athletesCreate);
+    athletesTable.grantReadWriteData(athletesUpdate);
+    athletesTable.grantReadWriteData(athletesUploadHeadshot);
+
+    // Grant Rekognition permissions to athletes headshot Lambda
+    athletesUploadHeadshot.addToRolePolicy(new iam.PolicyStatement({
+      actions: [
+        'rekognition:IndexFaces',
+        'rekognition:DeleteFaces',
+      ],
+      resources: ['*'],
+    }));
+
+    // Events API
     const eventsList = new lambda.Function(this, 'EventsList', {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: 'list.handler',
@@ -588,6 +943,35 @@ export class VincoStack extends cdk.Stack {
       layers: [sharedLayer],
       environment: apiCommonEnv,
     });
+
+    // Events table permissions
+    eventsTable.grantReadData(eventsList);
+    eventSchedulesTable.grantReadData(eventsGetSchedule);
+    startListsTable.grantReadData(eventsGetSchedule);
+    resultsTable.grantReadData(eventsGetResults);
+    athletesTable.grantReadData(eventsGetResults); // For athlete name lookup
+    venuesTable.grantReadData(eventsList);
+
+    // Venues API
+    const venuesList = new lambda.Function(this, 'VenuesList', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'list.handler',
+      code: lambda.Code.fromAsset('lambda/api/venues'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
+    const venuesCreate = new lambda.Function(this, 'VenuesCreate', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'create.handler',
+      code: lambda.Code.fromAsset('lambda/api/venues'),
+      layers: [sharedLayer],
+      environment: apiCommonEnv,
+    });
+
+    // Venues table permissions
+    venuesTable.grantReadData(venuesList);
+    venuesTable.grantReadWriteData(venuesCreate);
 
     // Videos API
     const videosList = new lambda.Function(this, 'VideosList', {
@@ -643,6 +1027,10 @@ export class VincoStack extends cdk.Stack {
       environment: apiCommonEnv,
     });
 
+    // Photographers table permissions
+    photographersTable.grantReadData(photographersList);
+    photographersTable.grantReadWriteData(photographersCreate);
+
     // Search API
     const search = new lambda.Function(this, 'Search', {
       runtime: lambda.Runtime.NODEJS_20_X,
@@ -654,6 +1042,8 @@ export class VincoStack extends cdk.Stack {
 
     imagesTable.grantReadData(search);
     albumsTable.grantReadData(search);
+    athletesTable.grantReadData(search);
+    eventsTable.grantReadData(search);
 
     // Athletes API Routes
     const athletes = api.root.addResource('athletes');
@@ -667,9 +1057,15 @@ export class VincoStack extends cdk.Stack {
     const events = api.root.addResource('events');
     events.addMethod('GET', new apigateway.LambdaIntegration(eventsList));
     const event = events.addResource('{eventId}');
-    event.addResource('schedule').addMethod('GET', new apigateway.LambdaIntegration(eventsGetSchedule));
-    const schedule = event.addResource('schedule').addResource('{scheduleId}');
-    schedule.addResource('results').addMethod('GET', new apigateway.LambdaIntegration(eventsGetResults));
+    const eventSchedule = event.addResource('schedule');
+    eventSchedule.addMethod('GET', new apigateway.LambdaIntegration(eventsGetSchedule));
+    const scheduleItem = eventSchedule.addResource('{scheduleId}');
+    scheduleItem.addResource('results').addMethod('GET', new apigateway.LambdaIntegration(eventsGetResults));
+
+    // Venues API Routes
+    const venues = api.root.addResource('venues');
+    venues.addMethod('GET', new apigateway.LambdaIntegration(venuesList));
+    venues.addMethod('POST', new apigateway.LambdaIntegration(venuesCreate));
 
     // Videos API Routes
     const videos = api.root.addResource('videos');
@@ -680,8 +1076,9 @@ export class VincoStack extends cdk.Stack {
     const users = api.root.addResource('users');
     users.addMethod('GET', new apigateway.LambdaIntegration(usersList));
     users.addMethod('POST', new apigateway.LambdaIntegration(usersCreate));
-    users.addResource('photographers').addMethod('GET', new apigateway.LambdaIntegration(photographersList));
-    users.addResource('photographers').addMethod('POST', new apigateway.LambdaIntegration(photographersCreate));
+    const photographers = users.addResource('photographers');
+    photographers.addMethod('GET', new apigateway.LambdaIntegration(photographersList));
+    photographers.addMethod('POST', new apigateway.LambdaIntegration(photographersCreate));
 
     // Search API Route
     api.root.addResource('search').addMethod('GET', new apigateway.LambdaIntegration(search));

@@ -45,6 +45,56 @@ class Vinco_MAM_Pages {
             'content' => '[vinco_search show_filters="true" public="true"]',
             'meta_description' => 'Search our photo archive by athlete, event, or date.',
         ],
+        'vinco-tags' => [
+            'title' => 'Browse by Category',
+            'content' => '[vinco_tags columns="3" show_counts="true" show_children="true" public="true"]',
+            'meta_description' => 'Browse photos by category, event, and location.',
+        ],
+        'vinco-photo' => [
+            'title' => 'Photo',
+            'content' => '<!-- Dynamic photo page - content loaded via JavaScript -->
+<div id="vinco-photo-page" class="vinco-photo-page" data-public="true">
+    <div class="vinco-gallery-loading">Loading photo...</div>
+</div>',
+            'meta_description' => 'View photo details.',
+            'dynamic' => true,
+        ],
+        'vinco-athlete' => [
+            'title' => 'Athlete',
+            'content' => '<!-- Dynamic athlete page - content loaded via JavaScript -->
+<div id="vinco-athlete-page" class="vinco-athlete-page" data-public="true">
+    <div class="vinco-gallery-loading">Loading athlete profile...</div>
+</div>',
+            'meta_description' => 'View athlete profile and photos.',
+            'dynamic' => true,
+        ],
+        'vinco-event' => [
+            'title' => 'Event',
+            'content' => '<!-- Dynamic event page - content loaded via JavaScript -->
+<div id="vinco-event-page" class="vinco-event-page" data-public="true">
+    <div class="vinco-gallery-loading">Loading event...</div>
+</div>',
+            'meta_description' => 'View event photos.',
+            'dynamic' => true,
+        ],
+        'vinco-album' => [
+            'title' => 'Album',
+            'content' => '<!-- Dynamic album page - content loaded via JavaScript -->
+<div id="vinco-album-page" class="vinco-album-page" data-public="true">
+    <div class="vinco-gallery-loading">Loading album...</div>
+</div>',
+            'meta_description' => 'View album photos.',
+            'dynamic' => true,
+        ],
+        'vinco-tag' => [
+            'title' => 'Tag',
+            'content' => '<!-- Dynamic tag page - content loaded via JavaScript -->
+<div id="vinco-tag-page" class="vinco-tag-page" data-public="true">
+    <div class="vinco-gallery-loading">Loading tag...</div>
+</div>',
+            'meta_description' => 'View photos by tag.',
+            'dynamic' => true,
+        ],
     ];
 
     /**
@@ -194,12 +244,29 @@ class Vinco_MAM_Pages {
         $repaired = [];
 
         foreach (self::$pages as $slug => $page_data) {
-            // Check if page exists
-            if (isset($page_ids[$slug]) && get_post($page_ids[$slug])) {
+            // Check if page exists AND is published (not trashed or draft)
+            $page_exists = false;
+            if (isset($page_ids[$slug])) {
+                $post = get_post($page_ids[$slug]);
+                if ($post && $post->post_status === 'publish') {
+                    $page_exists = true;
+                }
+            }
+
+            // Also check by slug in case page was recreated manually
+            if (!$page_exists) {
+                $existing_page = get_page_by_path($slug);
+                if ($existing_page && $existing_page->post_status === 'publish') {
+                    $page_ids[$slug] = $existing_page->ID;
+                    $page_exists = true;
+                }
+            }
+
+            if ($page_exists) {
                 continue;
             }
 
-            // Page is missing, recreate it
+            // Page is missing or trashed, recreate it
             $page_id = wp_insert_post([
                 'post_title'     => $page_data['title'],
                 'post_name'      => $slug,

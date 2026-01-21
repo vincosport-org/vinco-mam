@@ -5,6 +5,7 @@ import { images } from '../../services/api';
 import { LoadingSpinner, Button, Input, Skeleton } from '../common';
 import { GalleryItem } from './GalleryItem';
 import { ImagePreview } from './ImagePreview';
+import { UploadDialog } from './UploadDialog';
 
 interface Image {
   imageId: string;
@@ -36,6 +37,7 @@ export default function Gallery() {
   });
   const [selectedImage, setSelectedImage] = useState<Image | null>(null);
   const [page, setPage] = useState(1);
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
   const limit = 50;
 
   const { data, isLoading, error, refetch } = useQuery({
@@ -64,10 +66,25 @@ export default function Gallery() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Gallery</h1>
-        <Button onClick={() => refetch()}>
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => setShowUploadDialog(true)}>
+            Upload Images
+          </Button>
+          <Button variant="outline" onClick={() => refetch()}>
+            Refresh
+          </Button>
+        </div>
       </div>
+
+      {/* Upload Dialog */}
+      <UploadDialog
+        isOpen={showUploadDialog}
+        onClose={() => setShowUploadDialog(false)}
+        onUploadComplete={() => {
+          setShowUploadDialog(false);
+          refetch();
+        }}
+      />
 
       {/* Filters */}
       <div className="bg-white p-4 rounded-lg shadow mb-6">

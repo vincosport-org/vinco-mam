@@ -33,7 +33,186 @@
     }
 }
 
-.vinco-gallery-grid {
+/* ===== Filter Bar ===== */
+.vinco-filter-bar {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.vinco-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.vinco-filter-row:last-child {
+    margin-bottom: 0;
+}
+
+.vinco-filter-search {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.vinco-filter-search:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.vinco-filter-select {
+    padding: 10px 36px 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E") no-repeat right 10px center;
+    background-size: 16px;
+    appearance: none;
+    cursor: pointer;
+    min-width: 160px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.vinco-filter-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.vinco-filter-date {
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    min-width: 140px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.vinco-filter-date:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.vinco-filter-actions {
+    display: flex;
+    gap: 10px;
+    padding-top: 8px;
+    border-top: 1px solid #e5e7eb;
+    margin-top: 8px;
+}
+
+.vinco-filter-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.vinco-filter-apply {
+    background: #3b82f6;
+    color: white;
+    border: none;
+}
+
+.vinco-filter-apply:hover {
+    background: #2563eb;
+}
+
+.vinco-filter-clear {
+    background: white;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.vinco-filter-clear:hover {
+    background: #f3f4f6;
+}
+
+.vinco-filter-count {
+    font-size: 14px;
+    color: #6b7280;
+    padding: 10px 0;
+}
+
+.vinco-filter-label {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    white-space: nowrap;
+}
+
+.vinco-filter-number {
+    width: 80px;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    text-align: center;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.vinco-filter-number:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.vinco-filter-number::-webkit-inner-spin-button,
+.vinco-filter-number::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.vinco-filter-number[type=number] {
+    -moz-appearance: textfield;
+}
+
+.vinco-filter-separator {
+    display: flex;
+    align-items: center;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* Filter responsive */
+@media (max-width: 768px) {
+    .vinco-filter-row {
+        flex-direction: column;
+    }
+
+    .vinco-filter-search,
+    .vinco-filter-select,
+    .vinco-filter-date {
+        width: 100%;
+        min-width: unset;
+    }
+
+    .vinco-filter-actions {
+        flex-direction: column;
+    }
+
+    .vinco-filter-btn {
+        width: 100%;
+    }
+}
+
+.vinco-gallery-grid,
+.vinco-athletes-grid,
+.vinco-albums-grid {
     display: grid;
     gap: 20px;
     margin: 0;
@@ -395,5 +574,721 @@
 @media print {
     .vinco-lightbox-overlay {
         display: none;
+    }
+}
+
+/* ===== Card Grid (Albums, Athletes, Events) ===== */
+.vinco-albums-list,
+.vinco-athletes-list,
+.vinco-events-list {
+    margin: 30px 0;
+}
+
+.vinco-card-grid {
+    display: grid;
+    gap: 24px;
+    margin: 0;
+}
+
+.vinco-card-grid.vinco-col-1 { grid-template-columns: repeat(1, 1fr); }
+.vinco-card-grid.vinco-col-2 { grid-template-columns: repeat(2, 1fr); }
+.vinco-card-grid.vinco-col-3 { grid-template-columns: repeat(3, 1fr); }
+.vinco-card-grid.vinco-col-4 { grid-template-columns: repeat(4, 1fr); }
+.vinco-card-grid.vinco-col-5 { grid-template-columns: repeat(5, 1fr); }
+.vinco-card-grid.vinco-col-6 { grid-template-columns: repeat(6, 1fr); }
+
+.vinco-card {
+    display: block;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.vinco-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    text-decoration: none;
+    color: inherit;
+}
+
+.vinco-card-image {
+    width: 100%;
+    aspect-ratio: 16/10;
+    background: #f0f0f0;
+    overflow: hidden;
+    position: relative;
+}
+
+.vinco-card-image-square {
+    aspect-ratio: 1;
+}
+
+.vinco-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.vinco-card:hover .vinco-card-image img {
+    transform: scale(1.05);
+}
+
+.vinco-card-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    opacity: 0.3;
+    background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+}
+
+.vinco-card-content {
+    padding: 16px;
+}
+
+.vinco-card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 4px;
+    line-height: 1.3;
+}
+
+.vinco-card-subtitle {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.vinco-card-meta {
+    font-size: 12px;
+    color: #999;
+    margin-top: 8px;
+}
+
+.vinco-card-skeleton {
+    background: white;
+}
+
+/* ===== Search ===== */
+.vinco-search {
+    margin: 30px 0;
+}
+
+.vinco-search-form {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.vinco-search-input {
+    flex: 1;
+    padding: 14px 18px;
+    font-size: 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vinco-search-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.vinco-search-button {
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.vinco-search-button:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+.vinco-search-button:active {
+    transform: translateY(0);
+}
+
+.vinco-search-results {
+    min-height: 100px;
+}
+
+.vinco-search-hint {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+    font-size: 15px;
+}
+
+/* Card grid responsive */
+@media (max-width: 1024px) {
+    .vinco-card-grid.vinco-col-5,
+    .vinco-card-grid.vinco-col-6 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .vinco-card-grid.vinco-col-4,
+    .vinco-card-grid.vinco-col-5,
+    .vinco-card-grid.vinco-col-6 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .vinco-card-grid.vinco-col-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .vinco-search-form {
+        flex-direction: column;
+    }
+
+    .vinco-search-button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .vinco-card-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 16px;
+    }
+
+    .vinco-card {
+        border-radius: 8px;
+    }
+
+    .vinco-card-content {
+        padding: 12px;
+    }
+
+    .vinco-card-title {
+        font-size: 14px;
+    }
+}
+
+/* ===== Tags ===== */
+.vinco-tags-list,
+.vinco-tag-gallery {
+    margin: 30px 0;
+}
+
+.vinco-tags-grid {
+    display: grid;
+    gap: 20px;
+}
+
+.vinco-tags-grid.vinco-col-1 { grid-template-columns: repeat(1, 1fr); }
+.vinco-tags-grid.vinco-col-2 { grid-template-columns: repeat(2, 1fr); }
+.vinco-tags-grid.vinco-col-3 { grid-template-columns: repeat(3, 1fr); }
+.vinco-tags-grid.vinco-col-4 { grid-template-columns: repeat(4, 1fr); }
+.vinco-tags-grid.vinco-col-5 { grid-template-columns: repeat(5, 1fr); }
+.vinco-tags-grid.vinco-col-6 { grid-template-columns: repeat(6, 1fr); }
+
+.vinco-tag-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.vinco-tag-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.vinco-tag-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    padding: 20px;
+    position: relative;
+}
+
+.vinco-tag-color-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+}
+
+.vinco-tag-card-content {
+    padding-top: 4px;
+}
+
+.vinco-tag-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 6px;
+}
+
+.vinco-tag-desc {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.4;
+    margin-bottom: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.vinco-tag-count {
+    font-size: 12px;
+    color: #999;
+}
+
+.vinco-tag-children {
+    padding: 12px 20px 20px;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.vinco-tag-child {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #f5f5f5;
+    border-radius: 16px;
+    font-size: 13px;
+    color: #444;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.vinco-tag-child:hover {
+    background: #e8e8e8;
+    color: #1a1a1a;
+    text-decoration: none;
+}
+
+.vinco-tag-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.vinco-tag-child-count {
+    color: #999;
+    font-size: 12px;
+}
+
+/* Tag Gallery Header */
+.vinco-tag-header {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.vinco-tag-color {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+.vinco-tag-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 8px 0;
+}
+
+.vinco-tag-description {
+    font-size: 16px;
+    color: #666;
+    margin: 0 0 12px 0;
+    line-height: 1.5;
+}
+
+.vinco-tag-meta {
+    font-size: 14px;
+    color: #999;
+}
+
+/* Tags responsive */
+@media (max-width: 768px) {
+    .vinco-tags-grid.vinco-col-4,
+    .vinco-tags-grid.vinco-col-5,
+    .vinco-tags-grid.vinco-col-6 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .vinco-tags-grid.vinco-col-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .vinco-tag-title {
+        font-size: 22px;
+    }
+}
+
+@media (max-width: 480px) {
+    .vinco-tags-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .vinco-tag-link {
+        padding: 16px;
+    }
+
+    .vinco-tag-name {
+        font-size: 16px;
+    }
+
+    .vinco-tag-children {
+        padding: 12px 16px 16px;
+    }
+
+    .vinco-tag-title {
+        font-size: 20px;
+    }
+}
+
+/* ===== Detail Pages ===== */
+
+/* Photo Detail Page */
+.vinco-photo-page,
+.vinco-athlete-page,
+.vinco-event-page,
+.vinco-album-page,
+.vinco-tag-page {
+    margin: 30px 0;
+}
+
+.vinco-photo-detail {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 40px;
+    align-items: start;
+}
+
+.vinco-photo-detail-image {
+    background: #f5f5f5;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.vinco-photo-detail-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.vinco-photo-detail-info {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.vinco-photo-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+    color: #1a1a1a;
+}
+
+.vinco-photo-meta {
+    margin-bottom: 24px;
+}
+
+.vinco-meta-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+}
+
+.vinco-meta-label {
+    font-weight: 600;
+    color: #666;
+}
+
+.vinco-photo-athletes,
+.vinco-photo-tags,
+.vinco-photo-faces {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.vinco-photo-athletes h3,
+.vinco-photo-tags h3,
+.vinco-photo-faces h3 {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #666;
+    margin: 0 0 12px 0;
+}
+
+.vinco-athlete-chips,
+.vinco-tag-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.vinco-athlete-chip,
+.vinco-tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: #f5f5f5;
+    border-radius: 20px;
+    font-size: 14px;
+    color: #333;
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+
+.vinco-athlete-chip:hover,
+.vinco-tag-chip:hover {
+    background: #e8e8e8;
+    text-decoration: none;
+    color: #1a1a1a;
+}
+
+.vinco-face-info {
+    padding: 12px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.vinco-face-info strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.vinco-photo-actions {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.vinco-download-btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background: #3b82f6;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+
+.vinco-download-btn:hover {
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+}
+
+/* Athlete Detail Page */
+.vinco-athlete-detail,
+.vinco-event-detail,
+.vinco-album-detail,
+.vinco-tag-detail {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.vinco-athlete-header {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 40px;
+    padding-bottom: 30px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.vinco-athlete-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #f0f0f0;
+}
+
+.vinco-athlete-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.vinco-athlete-avatar-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 60px;
+    opacity: 0.3;
+}
+
+.vinco-athlete-info {
+    flex: 1;
+}
+
+.vinco-athlete-name {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    color: #1a1a1a;
+}
+
+.vinco-athlete-nationality {
+    font-size: 18px;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.vinco-athlete-disciplines {
+    font-size: 16px;
+    color: #888;
+    margin-bottom: 4px;
+}
+
+.vinco-athlete-team {
+    font-size: 14px;
+    color: #999;
+}
+
+.vinco-athlete-gallery h2,
+.vinco-event-gallery h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 20px 0;
+}
+
+/* Event Detail Page */
+.vinco-event-header,
+.vinco-album-header {
+    margin-bottom: 40px;
+    padding-bottom: 30px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.vinco-event-title,
+.vinco-album-title {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0 0 12px 0;
+    color: #1a1a1a;
+}
+
+.vinco-event-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+.vinco-event-date::before {
+    content: "📅 ";
+}
+
+.vinco-event-location::before {
+    content: "📍 ";
+}
+
+.vinco-event-description,
+.vinco-album-description {
+    font-size: 16px;
+    color: #555;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.vinco-album-meta {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 12px;
+}
+
+/* Tag Detail Page */
+.vinco-tag-subtags {
+    margin-bottom: 30px;
+}
+
+.vinco-tag-subtags h3 {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #666;
+    margin: 0 0 12px 0;
+}
+
+/* Responsive for detail pages */
+@media (max-width: 900px) {
+    .vinco-photo-detail {
+        grid-template-columns: 1fr;
+    }
+
+    .vinco-photo-detail-info {
+        order: -1;
+    }
+
+    .vinco-athlete-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .vinco-athlete-name,
+    .vinco-event-title,
+    .vinco-album-title {
+        font-size: 26px;
+    }
+}
+
+@media (max-width: 600px) {
+    .vinco-athlete-avatar {
+        width: 100px;
+        height: 100px;
+    }
+
+    .vinco-athlete-avatar-placeholder {
+        font-size: 40px;
+    }
+
+    .vinco-athlete-name,
+    .vinco-event-title,
+    .vinco-album-title {
+        font-size: 22px;
+    }
+
+    .vinco-photo-title {
+        font-size: 20px;
+    }
+
+    .vinco-event-meta {
+        flex-direction: column;
+        gap: 8px;
     }
 }

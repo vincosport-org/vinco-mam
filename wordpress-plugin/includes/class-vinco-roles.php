@@ -28,6 +28,8 @@ class Vinco_MAM_Roles {
             'vinco_view_albums' => true,
             'vinco_view_athletes' => true,
             'vinco_view_videos' => true,
+            'vinco_manage_content' => true,
+            'vinco_validate_recognition' => true,
         ]);
         
         // Admin gets all capabilities
@@ -40,6 +42,12 @@ class Vinco_MAM_Roles {
             $admin->add_cap('vinco_manage_albums');
             $admin->add_cap('vinco_manage_athletes');
             $admin->add_cap('vinco_download_original');
+            $admin->add_cap('vinco_manage_content');
+        }
+
+        // Editor also gets content management
+        if ($editor) {
+            $editor->add_cap('vinco_manage_content');
         }
     }
     

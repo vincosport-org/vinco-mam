@@ -3,14 +3,26 @@
  */
 
 /**
- * Parse JWT token from Authorization header
+ * Parse JWT token from Authorization header or X-Vinco-Auth header
  */
 exports.parseToken = (headers) => {
+  // Check standard Authorization header first
   const authHeader = headers.Authorization || headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return null;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authHeader.substring(7);
   }
-  return authHeader.substring(7);
+
+  // Check X-Vinco-Auth header (used by WordPress plugin)
+  const vincoAuthHeader = headers['X-Vinco-Auth'] || headers['x-vinco-auth'];
+  if (vincoAuthHeader) {
+    // WordPress sends JWT directly without Bearer prefix
+    if (vincoAuthHeader.startsWith('Bearer ')) {
+      return vincoAuthHeader.substring(7);
+    }
+    return vincoAuthHeader;
+  }
+
+  return null;
 };
 
 /**
@@ -43,17 +55,20 @@ exports.getUserFromRequest = (event) => {
         email: payload.email,
         name: payload.name,
         role: payload.role,
+        username: payload.username || payload.name || payload.email?.split('@')[0] || 'unknown',
       };
     }
   }
   
   // Try to get from request context (if using Lambda authorizer)
   if (event.requestContext && event.requestContext.authorizer) {
+    const auth = event.requestContext.authorizer;
     return {
-      userId: event.requestContext.authorizer.userId || event.requestContext.authorizer.sub,
-      email: event.requestContext.authorizer.email,
-      name: event.requestContext.authorizer.name,
-      role: event.requestContext.authorizer.role,
+      userId: auth.userId || auth.sub,
+      email: auth.email,
+      name: auth.name,
+      role: auth.role,
+      username: auth.username || auth.name || auth.email?.split('@')[0] || 'unknown',
     };
   }
   
@@ -80,16 +95,23 @@ exports.hasPermission = (user, requiredRole) => {
 };
 
 /**
+ * Standard CORS headers
+ */
+exports.corsHeaders = {
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Vinco-Auth',
+  'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+};
+
+/**
  * Create API Gateway response
  */
 exports.createResponse = (statusCode, body, headers = {}) => {
   return {
     statusCode,
     headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-      'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+      ...exports.corsHeaders,
       ...headers,
     },
     body: JSON.stringify(body),
